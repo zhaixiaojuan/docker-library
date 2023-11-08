@@ -1,15 +1,15 @@
 #IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
 variable "TAG" {
-  default = "latest"
+  default = "T_TAG"
 }
 variable "REGISTRY" {
-  default = "lcr.loongnix.cn"
+  default = "T_REGISTRY"
 }
 variable "ORGANIZATION" {
-  default = "library"
+  default = "T_ORGANIZATION"
 }
 variable "REPOSITORY" {
-  default = "template"
+  default = "T_REPOSITORY"
 }
 
 group "default" {
