@@ -19,13 +19,7 @@ image: src
 	cd src/util/bats-assert &&  docker buildx bake -f docker-bake.hcl
 
 push:
-	docker push $(IMAGE)
-	#latest image
-	@if [ $(LATEST) = "true" ]; \
-		then \
-		docker tag $(IMAGE) $(LATEST_IMAGE); \
-		docker push $(LATEST_IMAGE); \
-	fi
+	cd src/util/bats-assert && docker buildx bake --push -f docker-bake.hcl
 
 clean:
 	rm -rf src
