@@ -1,0 +1,8 @@
+FROM yangzewei2023/busybox:1.32.0
+ENV QEMU_BIN_DIR=/usr/bin
+ADD ./register.sh /register
+ADD ./scripts/qemu-binfmt-conf.sh /qemu-binfmt-conf.sh
+#ADD https://raw.githubusercontent.com/qemu/qemu/v8.2.0/scripts/qemu-binfmt-conf.sh /qemu-binfmt-conf.sh
+RUN chmod +x /qemu-binfmt-conf.sh
+COPY qemu-*-static /usr/bin/
+ENTRYPOINT ["/register"]
