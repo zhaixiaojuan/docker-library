@@ -1,0 +1,16 @@
+name: pull request merge
+env:
+  PR_NUMBER: ${{ github.event.number }}
+on:
+  pull_request:
+    types:
+      - closed
+jobs:
+  if_merged:
+    if: github.event.pull_request.merged == true
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 2
+    - run: lmake merge
