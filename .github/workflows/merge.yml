@@ -10,7 +10,7 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v3
+    - uses: chenguohui/checkout@v3-node20
       with:
         fetch-depth: 2
     - run: lmake merge

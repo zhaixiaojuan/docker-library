@@ -11,7 +11,7 @@ jobs:
     runs-on: self-hosted
     steps:
       # 获取最新变动
-      - uses: actions/checkout@v3
+      - uses: chenguohui/checkout@v3-node20
         with:
           fetch-depth: 2
       - run: lmake build
