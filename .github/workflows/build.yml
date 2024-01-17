@@ -1,0 +1,17 @@
+name: build
+env:
+  PR_NUMBER: ${{ github.event.number }}
+# 指定此工作流程的触发器
+on: 
+  pull_request:
+    branches: [main]
+jobs:
+  # 定义名称为"image-build"的job
+  image-build:
+    runs-on: self-hosted
+    steps:
+      # 获取最新变动
+      - uses: chenguohui/checkout@v3-node20
+        with:
+          fetch-depth: 2
+      - run: lmake build
