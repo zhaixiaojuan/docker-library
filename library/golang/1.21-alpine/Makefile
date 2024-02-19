@@ -5,7 +5,7 @@ ORGANIZATION ?= library
 REPOSITORY   ?= golang
 TAG          ?= 1.21-alpine
 
-IMAGE = $(REGISTRY)/$(REPOSITORY):$(TAG)
+IMAGE = $(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
 
 default: image
 
