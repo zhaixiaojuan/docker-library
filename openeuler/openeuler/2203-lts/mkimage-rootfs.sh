@@ -63,7 +63,6 @@ metalink=https://mirrors.openeuler.org/metalink?repo=$releasever/OS&arch=${arch}
 metadata_expire=1h
 enabled=1
 gpgcheck=0
-gpgkey=http://repo.openeuler.org/openEuler-22.03-LTS/OS/$arch/RPM-GPG-KEY-openEuler
 
 [everything]
 name=everything
@@ -72,7 +71,6 @@ metalink=https://mirrors.openeuler.org/metalink?repo=$releasever/everything&arch
 metadata_expire=1h
 enabled=1
 gpgcheck=0
-gpgkey=http://repo.openeuler.org/openEuler-22.03-LTS/everything/$arch/RPM-GPG-KEY-openEuler
 
 [EPOL]
 name=EPOL
@@ -81,7 +79,6 @@ metalink=https://mirrors.openeuler.org/metalink?repo=$releasever/EPOL/main&arch=
 metadata_expire=1h
 enabled=1
 gpgcheck=0
-gpgkey=http://repo.openeuler.org/openEuler-22.03-LTS/OS/$arch/RPM-GPG-KEY-openEuler
 
 [debuginfo]
 name=debuginfo
@@ -94,7 +91,6 @@ metalink=https://mirrors.openeuler.org/metalink?repo=$releasever&arch=source
 metadata_expire=1h
 enabled=1
 gpgcheck=0
-gpgkey=http://repo.openeuler.org/openEuler-22.03-LTS/source/RPM-GPG-KEY-openEuler
 EOF
 ####################################################################
 

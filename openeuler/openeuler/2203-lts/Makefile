@@ -11,7 +11,8 @@ LATEST_IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):latest
 default: image
 
 rootfs:
-	bash mkimage-rootfs.sh
+	#bash mkimage-rootfs.sh
+	wget https://github.com/Loongson-Cloud-Community/openeuler-docker-images/releases/download/22.03-LTS/openEuler-22.03-LTS.rootfs.loongarch64.tar.gz
 image: clear rootfs
 	docker build  \
 		--build-arg TARGETARCH=$(ARCH) \
