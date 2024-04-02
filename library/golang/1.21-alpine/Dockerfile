@@ -1,4 +1,4 @@
-FROM lcr.loongnix.cn/library/alpine:v3.18-base
+FROM lcr.loongnix.cn/library/alpine:3.19
 
 RUN apk add --no-cache ca-certificates
 
