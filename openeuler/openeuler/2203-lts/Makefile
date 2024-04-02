@@ -6,7 +6,6 @@ LATEST          ?=true
 ARCH?=loongarch64
 
 IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
-LATEST_IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):latest
 
 default: image
 
@@ -17,15 +16,10 @@ image: clear rootfs
 	docker build  \
 		--build-arg TARGETARCH=$(ARCH) \
 		--build-arg TAG=$(TAG) \
-		-t lcr.loongnix.cn/$(ORGANIZATION)/$(REPOSITORY):$(TAG) .
+		-t $(IMAGE) .
 
 push:
 	docker push $(IMAGE)
-	@if [ "$(LATEST) = true "] ; \
-		then \
-		docker tag $(IMAGE) $(LATEST_IMAGE)
-		docker push $(LATEST_IMAGE)
-	fi;
 
 clear:
 	rm -rf  openEuler*
