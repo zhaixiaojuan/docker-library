@@ -4,10 +4,15 @@ FROM lcr.loongnix.cn/library/alpine:3.19
 ENV PATH="${PATH:-/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin}"
 
 # hadolint ignore=DL3018
-RUN apk add --no-cache bash ca-certificates dumb-init git git-lfs miniperl wget\
-    && ln -s miniperl /usr/bin/perl
+RUN apk add --no-cache bash ca-certificates dumb-init git miniperl wget \
+    && ln -s miniperl /usr/bin/perl \
+    && wget https://github.com/git-lfs/git-lfs/releases/download/v3.5.1/git-lfs-linux-loong64-v3.5.1.tar.gz -O git-lfs.tar.gz \
+    && tar xf git-lfs.tar.gz \
+    && mv  git-lfs-3.5.1/git-lfs /usr/bin \
+    && chmod +x /usr/bin/git-lfs \
+    && rm -rf git-lfs*
 
-RUN git lfs install --skip-repo
+RUN git-lfs install --skip-repo
 
 COPY ./helpers/entrypoint /
 RUN chmod +x /entrypoint

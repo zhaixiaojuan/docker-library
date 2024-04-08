@@ -52,8 +52,7 @@ wget -nv "https://github.com/Loongson-Cloud-Community/dumb-init/releases/downloa
 chmod +x /usr/bin/dumb-init
 dumb-init --version
 
-#wget -nv "https://github.com/Loongson-Cloud-Community/git-lfs/releases/download/v2.11.0/git-lfs-linux-loong64" -O /usr/bin/git-lfs
-wget -nv "https://github.com/Loongson-Cloud-Community/git-lfs/releases/download/v2.11.0-abi2.0/git-lfs-linux-loong64" -O /usr/bin/git-lfs
+wget https://github.com/git-lfs/git-lfs/releases/download/v3.5.1/git-lfs-linux-loong64-v3.5.1.tar.gz -O git-lfs.tar.gz && tar xf git-lfs.tar.gz && cp git-lfs-3.5.1/git-lfs /usr/bin
 ls -l /usr/bin/git-lfs
 chmod +x /usr/bin/git-lfs
 /usr/bin/git-lfs install --skip-repo
