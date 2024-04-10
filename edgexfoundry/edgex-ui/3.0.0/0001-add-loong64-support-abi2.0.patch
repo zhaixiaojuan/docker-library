@@ -64,7 +64,7 @@ index d5cc7da..a9850e7 100644
 +	--build-arg http_proxy=$(http_proxy) \
  	-t edgexfoundry/edgex-ui:$(GIT_SHA) \
  	-t edgexfoundry/edgex-ui:$(VERSION)-dev \
-+	-t lcr.loongnix.cn/edgexfoundry/edgex-ui:$(VERSION) \
++	-t lcr.loongnix.cn/edgexfoundry/edgex-ui:3.0.0 \
  	.
  
  vendor:
