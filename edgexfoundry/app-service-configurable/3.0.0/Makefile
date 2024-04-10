@@ -3,8 +3,8 @@
 REGISTRY?=lcr.loongnix.cn
 ORGANIZATION?=edgexfoundry
 REPOSITORY?=app-service-configurable
-TAG?=2.3.0
-BRANCH=v2.3.0
+TAG?=3.0.0
+BRANCH=v3.0.0
 
 IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
 
@@ -14,7 +14,6 @@ IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
 # Be sure to fill in the follows!!!
 SOURCE_URL=https://github.com/edgexfoundry/app-service-configurable.git
 SOURCE=$(shell echo $(SOURCE_URL) | awk -F '/' '{print $$NF}' | awk -F '.' '{print $$1}')
-#PATCH=0001-port-to-loong64.patch
 PATCH=0001-add-loong64-support-abi-2.0.patch
 
 default: image
