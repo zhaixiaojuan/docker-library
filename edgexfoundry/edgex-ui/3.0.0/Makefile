@@ -4,7 +4,7 @@ REGISTRY?=lcr.loongnix.cn
 ORGANIZATION?=edgexfoundry
 REPOSITORY?=edgex-ui
 TAG?=3.0.0
-BRANCH:=v3.0.0-dev.1
+BRANCH:=v3.0.0
 
 IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
 

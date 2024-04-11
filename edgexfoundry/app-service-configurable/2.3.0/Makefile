@@ -3,7 +3,7 @@
 REGISTRY?=lcr.loongnix.cn
 ORGANIZATION?=edgexfoundry
 REPOSITORY?=app-service-configurable
-TAG?=3.0.0
+TAG?=2.3.0
 BRANCH=v2.3.0
 
 IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
