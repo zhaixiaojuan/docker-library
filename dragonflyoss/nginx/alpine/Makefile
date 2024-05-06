@@ -11,7 +11,7 @@ LATEST_IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):latest
 default: image
 
 pkg-oss:
-	wget http://cloud.loongnix.cn/releases/loongarch64/nginx/pkg-oss.tar.gz
+	wget https://github.com/Loongson-Cloud-Community/nginx/releases/download/release-1.16.0/pkg-oss.tar.gz
 	tar -xf pkg-oss.tar.gz
 
 image: pkg-oss
