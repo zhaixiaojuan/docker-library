@@ -3,13 +3,11 @@
 REGISTRY?=lcr.loongnix.cn
 ORGANIZATION?=library
 REPOSITORY?=alpine
-TAG?=3.19
+TAG?=3.18
 
 IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
 
 ROOTFS=rootfs.tar.gz
-
-ALIAS=lcr.loongnix.cn/library/alpine:3.19-temporary
 
 default: image
 
@@ -19,12 +17,9 @@ image: $(ROOTFS)
 		-t $(IMAGE) \
 		.
 
-push: alias
+push:
 	docker push $(IMAGE)
-	docker push $(ALIAS)
 
 $(ROOTFS):
-	wget -O $(ROOTFS) https://dev.alpinelinux.org/~loongarch/edge/releases/loongarch64/alpine-minirootfs-edge-240514-loongarch64.tar.gz
+	wget -O $(ROOTFS) https://dev.alpinelinux.org/~loongarch/v3.18/releases/loongarch64/alpine-minirootfs-v3.18.4-loongarch64.tar.gz
 
-alias:
-	docker tag $(IMAGE) $(ALIAS)
