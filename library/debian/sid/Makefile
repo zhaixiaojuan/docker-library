@@ -6,6 +6,7 @@ REPOSITORY?=debian
 TAG?=sid
 LATEST?=true
 ROOTFS?=rootfs.tar.xz
+ROOTFS_RELEASE:=1
 
 IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
 LATEST_IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):latest
@@ -30,8 +31,8 @@ push:
 
 ${ROOTFS}:
 	# docker seccomp don't support clone3 
-	docker run -it --rm \
+	docker run --rm \
 		--security-opt seccomp=unconfined  \
 		-v `pwd`:/wk \
 		lcr.loongnix.cn/library/debian:sid \
-		/bin/bash -c -- '/wk/make_rootfs.sh' \
+		/bin/bash -c -- '/wk/make_rootfs.sh' 
