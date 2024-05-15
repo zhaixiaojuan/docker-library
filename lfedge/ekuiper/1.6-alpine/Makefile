@@ -20,7 +20,6 @@ check:
 	@[ -f Dockerfile ] || (echo "error: Dockerfile has lost." ; exit 1)
 	@[ -f docker-entrypoint.sh ] || (echo "error: docker-entrypoint.sh has lost." ; exit 1)
 	@[ -d $(KUIPER) ] || (echo "$(KUIPER) is needed,downloading..." ;\
-		echo "10.130.0.87 cloud.loongnix.cn" > /etc/hosts && \
 		wget -O $(TAR_GZ) -q $(URL)&& \
 		tar -zxf $(TAR_GZ) --strip-components 1 && \
 		rm -f $(TAR_GZ) && \

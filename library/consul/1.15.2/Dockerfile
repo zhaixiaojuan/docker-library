@@ -36,7 +36,6 @@ RUN set -eux && \
     mkdir -p /tmp/build && \
     cd /tmp/build && \
     consulArch='loong64' && \
-    echo "10.130.0.87 cloud.loongnix.cn" && \
     wget ${HASHICORP_RELEASES}/${CONSUL_VERSION}/consul-linux-${consulArch}.tar.gz && \
     tar xf consul-linux-${consulArch}.tar.gz --strip-component 3 -C /tmp/build && \
     cp /tmp/build/consul /bin/consul && \
