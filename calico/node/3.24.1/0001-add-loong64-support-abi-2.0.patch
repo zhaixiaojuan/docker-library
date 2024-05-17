@@ -206,7 +206,7 @@ index 0000000..c445e55
 +
 +# Copy in the filesystem - this contains felix, calico-bgp-daemon etc...
 +RUN mkdir -p /filesystem
-+COPY filesystem/* /filesystem
++COPY filesystem/ /
 +
 +# Set the suid bit on mountns
 +RUN chmod u+s /bin/mountns

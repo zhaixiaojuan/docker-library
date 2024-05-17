@@ -12,7 +12,7 @@ KUIPER?=kuiper-1.6.3-linux-loong64
 TAR_GZ?=$(KUIPER).tar.gz
 
 #URL?=https://github.com/Loongson-Cloud-Community/ekuiper/releases/download/1.6.3/kuiper-1.6.3-linux-loong64.tar.gz
-URL?=http://cloud.loongnix.cn/releases/loongarch64/lf-edge%2Fekuiper%2F1.6.3/ekuiper-linux-loong64.tar.gz
+URL?=http://cloud.loongnix.cn/releases/loongarch64/lf-edge/ekuiper/1.6.3/ekuiper-linux-loong64.tar.gz
 
 default: image
 
@@ -20,9 +20,11 @@ check:
 	@[ -f Dockerfile ] || (echo "error: Dockerfile has lost." ; exit 1)
 	@[ -f docker-entrypoint.sh ] || (echo "error: docker-entrypoint.sh has lost." ; exit 1)
 	@[ -d $(KUIPER) ] || (echo "$(KUIPER) is needed,downloading..." ;\
+		unset http_proxy && \
 		wget -O $(TAR_GZ) -q $(URL)&& \
 		tar -zxf $(TAR_GZ) --strip-components 1 && \
 		rm -f $(TAR_GZ) && \
+		export http_proxy=$(https_proxy) && \
 		echo "done.")	
 
 image: check

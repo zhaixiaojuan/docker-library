@@ -23,6 +23,7 @@ image: src/$(SOURCE)
 	docker tag node:latest $(IMAGE)
 
 src/$(SOURCE):
+	export GOPROXY=https://goproxy.cn
 	git clone -b v$(TAG) --depth=1 $(SOURCE_URL) $@
 	cd $@ && \
 		git apply ../../$(PATCH) && \
