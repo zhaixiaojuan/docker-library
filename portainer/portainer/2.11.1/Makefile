@@ -6,27 +6,36 @@ REPOSITORY	?=portainer
 TAG		?=2.11.1
 LATEST		?=true
 
-IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
-LATEST_IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):latest
+IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY)-ce:$(TAG)
+LATEST_IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY)-ce:latest
 URL=https://github.com/portainer/portainer
-PATCH=0001-add-loong64-support.patch
+PATCH=0001-add-loong64-support-abi-2.0.patch
 
 default: image
 
 src: clean
+	 wget https://github.com/Loongson-Cloud-Community/portainer/releases/download/2.11.1/portainer-fronted.tar.gz && tar xf portainer-fronted.tar.gz && rm portainer-fronted.tar.gz && \
 	git clone -b 2.11.1 --depth 1 $(URL) && \
-		cd $(REPOSITORY) && \
-		git apply ../0001-add-loong64-support.patch && cd api && go mod vendor
+	cd $(REPOSITORY) && \
+	git apply ../$(PATCH) && cd api && go mod vendor
 	cd $(REPOSITORY) && bash build/build_binary.sh linux loong64
-image:
-	cd $(REPOSITORY) && docker build \
+download: src
+	mkdir -p dist && cd dist && \
+	wget -O kubectl http://cloud.loongnix.cn/releases/loongarch64/kubernetes/kubernetes/v1.20.0/kubectl && chmod +x kubectl && \
+	wget http://cloud.loongnix.cn/releases/loongarch64/docker/cli/24.0.6/cli-loong64-24.0.6.tar.gz && tar xf cli-loong64-24.0.6.tar.gz && cp build/* ./ && rm -rf build cli-loong64-24.0.6.tar.gz && \
+	wget http://cloud.loongnix.cn/releases/loongarch64/docker/compose/2.22.0/docker-compose-loong64-v2.22.0-rc.1.tar.gz && tar xf docker-compose-loong64-v2.22.0-rc.1.tar.gz && cp docker-compose-loong64-v2.22.0-rc.1/* ./ && rm -rf docker-compose-loong64-v2.22.0-rc.1 docker-compose-loong64-v2.22.0-rc.1.tar.gz && \
+	cp ../portainer/dist/portainer ./
+image: download
+	docker build -t lcr.loongnix.cn/portainer/base:latest -f base.Dockerfile .
+	docker build \
 		--build-arg http_proxy=$(http_proxy) \
 		--build-arg https_proxy=$(https_proxy) \
-		-t $(IMAGE) -f build/linux/alpine.Dockerfile \
+		-t $(IMAGE) -f portainer/build/linux/Dockerfile \
 		.
 
 push:
 	docker push $(IMAGE)
+	docker push lcr.loongnix.cn/portainer/base:latest
 	#latest image
 	@if [ $(LATEST) = "true" ]; \
 		then \
@@ -35,4 +44,4 @@ push:
 	fi
 
 clean:
-	rm -rf $(REPOSITORY)
+	rm -rf $(REPOSITORY) public storybook dist

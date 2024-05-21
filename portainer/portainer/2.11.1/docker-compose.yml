@@ -1,7 +1,10 @@
-version: '3'
+version: '2'
 services:
-  portainer:
-    image: portainer:latest
+  portainer-prod:
+    #    image: portainer:latest
+    #image: portainer/update:latest
+    image: lcr.loongnix.cn/portainer/portainer:2.11.1
+    container_name: portainer-prod
     ports:
       - "9000:9000"
     volumes:

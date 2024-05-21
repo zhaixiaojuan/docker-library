@@ -1,16 +1,18 @@
-From be26de17e2e18b5d84b61b0e237702a6d3df3d7e Mon Sep 17 00:00:00 2001
+From 718e9ccdbb3e76471f14f2fc03e5eba9b70a7552 Mon Sep 17 00:00:00 2001
 From: yzewei <yangzewei@loongson.cn>
-Date: Mon, 20 May 2024 15:37:30 +0800
-Subject: [PATCH] add loong64 support
+Date: Tue, 21 May 2024 10:48:47 +0800
+Subject: [PATCH] add loong64 support (abi-2.0)
 
 Signed-off-by: yzewei <yangzewei@loongson.cn>
 ---
- api/database/boltdb/db.go     |  2 +-
- api/database/boltdb/export.go |  2 +-
- api/go.mod                    | 10 +++++-----
- api/go.sum                    | 21 ++++++++++++++-------
- build/linux/alpine.Dockerfile |  2 +-
- 5 files changed, 22 insertions(+), 15 deletions(-)
+ api/database/boltdb/db.go               |  2 +-
+ api/database/boltdb/export.go           |  2 +-
+ api/go.mod                              | 10 +++++-----
+ api/go.sum                              | 21 ++++++++++++++-------
+ build/download_docker_compose_binary.sh | 14 ++++++++++----
+ build/linux/Dockerfile                  |  4 +++-
+ build/linux/alpine.Dockerfile           |  5 +++--
+ 7 files changed, 37 insertions(+), 21 deletions(-)
 
 diff --git a/api/database/boltdb/db.go b/api/database/boltdb/db.go
 index 8ffe14b..e35a8a1 100644
@@ -152,8 +154,51 @@ index b04a82a..844d282 100644
  gotest.tools v2.2.0+incompatible h1:VsBPFP1AI068pPrMxtb/S8Zkgf9xEmTLJjfM+P5UIEo=
  gotest.tools v2.2.0+incompatible/go.mod h1:DsYFclhRJ6vuDpmuTbkuFWG+y2sxOXAzmJt81HFBacw=
  gotest.tools/v3 v3.0.2/go.mod h1:3SzNCllyD9/Y+b5r9JIKQ474KzkZyqLqEfYqMsX94Bk=
+diff --git a/build/download_docker_compose_binary.sh b/build/download_docker_compose_binary.sh
+index 63ea5b0..a3181db 100755
+--- a/build/download_docker_compose_binary.sh
++++ b/build/download_docker_compose_binary.sh
+@@ -45,13 +45,19 @@ function download_plugin() {
+         FILENAME="$FILENAME.exe"
+         TARGET_FILENAME="$TARGET_FILENAME.exe"
+     fi
+-    
+-    wget -O "dist/$TARGET_FILENAME" "https://github.com/docker/compose-cli/releases/download/v$PLUGIN_VERSION/$FILENAME"
+-    chmod +x "dist/$TARGET_FILENAME"
++   
++    if [[ "$PLATFORM" == "loong64" ]]; then
++        URL="http://cloud.loongnix.cn/releases/loongarch64/docker/compose/2.22.0/docker-compose-loong64-v2.22.0-rc.1.tar.gz"
++        wget -O "dist/$TARGET_FILENAME" $URL
++        chmod +x "dist/$TARGET_FILENAME"
++    fi
++
++#    wget -O "dist/$TARGET_FILENAME" "https://github.com/docker/compose-cli/releases/download/v$PLUGIN_VERSION/$FILENAME"
++#    chmod +x "dist/$TARGET_FILENAME"
+ }
+ 
+ if [ "${PLATFORM}" == 'linux' ] && [ "${ARCH}" != 'amd64' ]; then
+     download_plugin "$PLATFORM" "$ARCH" "$DOCKER_COMPOSE_VERSION"
+ fi
+ 
+-download_binary "$PLATFORM" "$ARCH" "$DOCKER_COMPOSE_VERSION"
+\ No newline at end of file
++download_binary "$PLATFORM" "$ARCH" "$DOCKER_COMPOSE_VERSION"
+diff --git a/build/linux/Dockerfile b/build/linux/Dockerfile
+index c07dc6d..bec8ef7 100644
+--- a/build/linux/Dockerfile
++++ b/build/linux/Dockerfile
+@@ -1,6 +1,8 @@
+-FROM portainer/base
++FROM lcr.loongnix.cn/portainer/base:latest
+ 
+ COPY dist /
++COPY public /public
++COPY storybook /storybook
+ 
+ VOLUME /data
+ WORKDIR /
 diff --git a/build/linux/alpine.Dockerfile b/build/linux/alpine.Dockerfile
-index 6108c4c..2c0abf7 100644
+index 6108c4c..053c11d 100644
 --- a/build/linux/alpine.Dockerfile
 +++ b/build/linux/alpine.Dockerfile
 @@ -1,4 +1,4 @@
@@ -162,6 +207,13 @@ index 6108c4c..2c0abf7 100644
  
  COPY dist /
  
+@@ -9,4 +9,5 @@ EXPOSE 9000
+ EXPOSE 9443
+ EXPOSE 8000
+ 
+-ENTRYPOINT ["/portainer"]
++#ENTRYPOINT ["/portainer"]
++ENTRYPOINT ["/bin/sh"]
 -- 
 2.41.0
 
