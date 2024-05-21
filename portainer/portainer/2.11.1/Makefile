@@ -17,13 +17,13 @@ src: clean
 	 wget https://github.com/Loongson-Cloud-Community/portainer/releases/download/2.11.1/portainer-fronted.tar.gz && tar xf portainer-fronted.tar.gz && rm portainer-fronted.tar.gz && \
 	git clone -b 2.11.1 --depth 1 $(URL) && \
 	cd $(REPOSITORY) && \
-	git apply ../$(PATCH) && cd api && go mod vendor
+	git apply ../$(PATCH) && cd api && go mod tidy && go mod vendor
 	cd $(REPOSITORY) && bash build/build_binary.sh linux loong64
 download: src
 	mkdir -p dist && cd dist && \
-	wget -O kubectl http://cloud.loongnix.cn/releases/loongarch64/kubernetes/kubernetes/v1.20.0/kubectl && chmod +x kubectl && \
-	wget http://cloud.loongnix.cn/releases/loongarch64/docker/cli/24.0.6/cli-loong64-24.0.6.tar.gz && tar xf cli-loong64-24.0.6.tar.gz && cp build/* ./ && rm -rf build cli-loong64-24.0.6.tar.gz && \
-	wget http://cloud.loongnix.cn/releases/loongarch64/docker/compose/2.22.0/docker-compose-loong64-v2.22.0-rc.1.tar.gz && tar xf docker-compose-loong64-v2.22.0-rc.1.tar.gz && cp docker-compose-loong64-v2.22.0-rc.1/* ./ && rm -rf docker-compose-loong64-v2.22.0-rc.1 docker-compose-loong64-v2.22.0-rc.1.tar.gz && \
+	http_proxy="" wget -O kubectl http://cloud.loongnix.cn/releases/loongarch64/kubernetes/kubernetes/v1.20.0/kubectl && chmod +x kubectl && \
+	http_proxy="" wget http://cloud.loongnix.cn/releases/loongarch64/docker/cli/24.0.6/cli-loong64-24.0.6.tar.gz && tar xf cli-loong64-24.0.6.tar.gz && cp build/* ./ && rm -rf build cli-loong64-24.0.6.tar.gz && \
+	http_proxy="" wget http://cloud.loongnix.cn/releases/loongarch64/docker/compose/2.22.0/docker-compose-loong64-v2.22.0-rc.1.tar.gz && tar xf docker-compose-loong64-v2.22.0-rc.1.tar.gz && cp docker-compose-loong64-v2.22.0-rc.1/* ./ && rm -rf docker-compose-loong64-v2.22.0-rc.1 docker-compose-loong64-v2.22.0-rc.1.tar.gz && \
 	cp ../portainer/dist/portainer ./
 image: download
 	docker build -t lcr.loongnix.cn/portainer/base:latest -f base.Dockerfile .
