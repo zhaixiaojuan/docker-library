@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
 	# 编译安装
 	&& cd $NGINX_SRC_DIR/$NGINX_NAME && make && make install \
 	# forward request and error logs to docker log collector
-	&& mkdir /docker-entrypoint.d
+	&& mkdir /docker-entrypoint.d \
 	&& rm -rf $NGINX_SRC_DIR
 
 WORKDIR $NGINX_HOME
