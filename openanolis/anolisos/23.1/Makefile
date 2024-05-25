@@ -9,11 +9,11 @@ LATEST		?=true
 IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
 LATEST_IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):latest
 
-default: rootfs image
+default: image
 
 rootfs:
 	bash mkimage-rootfs.sh
-image:
+image: rootfs
 	docker build \
 		--build-arg http_proxy=$(http_proxy) \
 		--build-arg https_proxy=$(https_proxy) \
