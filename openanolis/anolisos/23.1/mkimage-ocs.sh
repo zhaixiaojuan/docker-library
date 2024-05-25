@@ -17,9 +17,11 @@ then
         exit 1
 fi
 
-output="AnolisOS-${version}.rootfs.${arch}.tar.gz"
+output="opencloudos-${version}.rootfs.${arch}.tar.gz"
 
-repos_baseos_url="https://build.openanolis.cn/kojifiles/rsync/anolis/23.1/isos/GA/loongarch64/"
+repos_baseos_url="http://10.130.0.6/opencloudos-stream/RPMS/"
+#repos_baseos_url_1="http://10.130.0.6/opencloudos-stream/euler/"
+#repos_baseos_url_2="http://10.130.0.6/opencloudos-stream/python"
 
 trap cleanup TERM EXIT
 
@@ -31,12 +33,12 @@ repo_conf="${repo_dir}/AnolisOS.repo"
 setting_scripts=setting.sh
 
 pkg_list="
- basesystem bash ca-certificates anolis-gpg-keys anolis-release
- anolis-repos chkconfig cracklib crypto-policies  dnf passwd
- expat gawk gdbm glib2 glibc gmp gnupg2 gpgme grep ima-evm-utils
- json-c mpfr ncurses-base procps rpm-build git findutils dnf-plugins-core
+ basesystem bash ca-certificates opencloudos-stream-release
+ opencloudos-stream-repos chkconfig cracklib crypto-policies  dnf passwd
+ expat gawk glib2 gdbm gmp gnupg2 gpgme grep ima-evm-utils
+ json-c mpfr ncurses-base procps git findutils dnf-plugins-core
  npth p11-kit p11-kit-trust pcre pcre2 popt readline rootfiles
- rpm sed setup systemd systemd-libs tzdata util-linux vim-minimal xz yum
+ sed setup systemd systemd-libs tzdata util-linux xz yum vim-minimal
 "
 #pkg_list="
 # acl basesystem bash ca-certificates anolis-gpg-keys anolis-release
@@ -62,13 +64,29 @@ mkdir -pv ${repo_dir} || :
 ####################################################################
 cat > ${repo_conf} << EOF
 [baseos]
-name=AnolisOS-$releasever-baseos
+name=AnolisOS-$releasever
 baseurl=${repos_baseos_url}
 gpgcheck=0
 enabled=1
 priority=1
 excludepkgs="${exclude_pkgs}"
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-LOONGNIX
+#[baseos-1]
+#name=AnolisOS-$releasever-1
+#baseurl=${repos_baseos_url_1}
+#gpgcheck=0
+#enabled=1
+#priority=1
+#excludepkgs="${exclude_pkgs}"
+#gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-LOONGNIX
+#[baseos-2]
+#name=AnolisOS-$releasever-2
+#baseurl=${repos_baseos_url_2}
+#gpgcheck=0
+#enabled=1
+#priority=1
+#excludepkgs="${exclude_pkgs}"
+#gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-LOONGNIX
 EOF
 ####################################################################
 
@@ -137,12 +155,12 @@ chmod +x ${rootfs}/${setting_scripts}
 chroot   ${rootfs} /${setting_scripts}
 
 ##解决在rootfs中su命令没有权限问题
-file_list="fingerprint-auth password-auth postlogin smartcard-auth system-auth user-profile"
-for file in ${file_list}
-do
-        chroot ${rootfs} authselect create-profile ${file}
-        chroot ${rootfs} ln -s /etc/authselect/custom/${file} /etc/pam.d/${file}
-done
+#file_list="fingerprint-auth password-auth postlogin smartcard-auth system-auth user-profile"
+#for file in ${file_list}
+#do
+#        chroot ${rootfs} authselect create-profile ${file}
+#        chroot ${rootfs} ln -s /etc/authselect/custom/${file} /etc/pam.d/${file}
+#done
 
 ##解决在chroot中/dev/null没有权限问题
 chroot ${rootfs} rm -rf /dev/null
