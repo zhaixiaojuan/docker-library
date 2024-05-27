@@ -1,4 +1,4 @@
-FROM lcr.loongnix.cn/library/debian:sid
+FROM lcr.loongnix.cn/library/openjdk:8-sid
 
 LABEL maintainer="yangzewei@loongson.cn"
 
@@ -45,7 +45,6 @@ RUN set -eux; \
 		wget \
 		xz-utils \
 		zlib1g-dev \
-		openjdk-8-jdk \
 	; \
 	wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz"; \
 	mkdir -p /usr/src/python; \
