@@ -1,0 +1,120 @@
+From 07d96198d919f88a487168eba07ff41f83a61778 Mon Sep 17 00:00:00 2001
+From: yangzewei <yangzewei@loongson.cn>
+Date: Thu, 30 May 2024 16:07:05 +0800
+Subject: [PATCH] add loong64 support
+
+Signed-off-by: yangzewei <yangzewei@loongson.cn>
+---
+ docker/Dockerfile.base          |  6 ++++--
+ docker/Dockerfile.distro_source | 17 +++++++++++++++++
+ docker/Dockerfile.distroless    | 12 +++++++-----
+ pilot/docker/Dockerfile.pilot   | 11 ++++++-----
+ 4 files changed, 34 insertions(+), 12 deletions(-)
+ create mode 100644 docker/Dockerfile.distro_source
+
+diff --git a/docker/Dockerfile.base b/docker/Dockerfile.base
+index 2d383f3..9033eff 100644
+--- a/docker/Dockerfile.base
++++ b/docker/Dockerfile.base
+@@ -1,4 +1,6 @@
+-FROM ubuntu:jammy
++FROM lcr.loongnix.cn/library/debian:sid
++
++LABEL maintainer = "Zewei Yang <yangzewei@loongson.cn>"
+ 
+ ENV DEBIAN_FRONTEND=noninteractive
+ 
+@@ -15,7 +17,7 @@ RUN apt-get update && \
+   iproute2 \
+   iputils-ping \
+   knot-dnsutils \
+-  netcat \
++  netcat.traditional \
+   tcpdump \
+   conntrack \
+   bsdmainutils \
+diff --git a/docker/Dockerfile.distro_source b/docker/Dockerfile.distro_source
+new file mode 100644
+index 0000000..d670146
+--- /dev/null
++++ b/docker/Dockerfile.distro_source
+@@ -0,0 +1,17 @@
++# 使用Debian的基础镜像  
++FROM lcr.loongnix.cn/library/debian:sid
++  
++# 创建一个新的用户组，名为nonroot，ID为65532（通常用户组ID和用户ID是分开的，但这里为了简单起见我们让它们相同）  
++RUN groupadd -g 65532 nonroot  
++  
++# 创建一个新用户，名为nonroot，ID为65532，并将其添加到nonroot组中  
++RUN useradd -u 65532 -g nonroot -m -s /bin/bash nonroot  
++  
++# 设置非root用户为默认用户  
++USER nonroot  
++  
++# （可选）安装一些软件包或进行其他设置  
++# RUN apt-get update && apt-get install -y --no-install-recommends some-package  
++  
++# 设置容器启动时执行的命令（这里只是一个示例，你可能需要替换为你自己的命令）  
++CMD ["/bin/bash"]
+diff --git a/docker/Dockerfile.distroless b/docker/Dockerfile.distroless
+index 28f9e26..ba54348 100644
+--- a/docker/Dockerfile.distroless
++++ b/docker/Dockerfile.distroless
+@@ -1,8 +1,10 @@
+ # prepare a distroless source context to copy files from
+-FROM gcr.io/distroless/static-debian11@sha256:6d31326376a7834b106f281b04f67b5d015c31732f594930f2ea81365f99d60c as distroless_source
++#FROM gcr.io/distroless/static-debian11@sha256:6d31326376a7834b106f281b04f67b5d015c31732f594930f2ea81365f99d60c as distroless_source
++FROM lcr.loongnix.cn/istio/distro_source:latest as distroless_source
+ 
+ # prepare a base dev to modify file contents
+-FROM ubuntu:focal as ubuntu_source
++#FROM ubuntu:focal as ubuntu_source
++FROM lcr.loongnix.cn/library/debian:sid as debian_source
+ 
+ # Modify contents of container
+ COPY --from=distroless_source /etc/ /home/etc
+@@ -15,6 +17,6 @@ RUN echo istio-proxy:x:1337:1337:istio-proxy:/nonexistent:/sbin/nologin >> /home
+ # - groups file
+ # - /home/nonroot directory
+ FROM distroless_source
+-COPY --from=ubuntu_source /home/etc/passwd /etc/passwd
+-COPY --from=ubuntu_source /home/etc/group /etc/group
+-COPY --from=ubuntu_source /home/nonroot /home/nonroot
+\ No newline at end of file
++COPY --from=debian_source /home/etc/passwd /etc/passwd
++COPY --from=debian_source /home/etc/group /etc/group
++COPY --from=debian_source /home/nonroot /home/nonroot
+diff --git a/pilot/docker/Dockerfile.pilot b/pilot/docker/Dockerfile.pilot
+index 6f51ffb..ff08da7 100644
+--- a/pilot/docker/Dockerfile.pilot
++++ b/pilot/docker/Dockerfile.pilot
+@@ -3,7 +3,7 @@ ARG BASE_DISTRIBUTION=debug
+ 
+ # Version is the base image version from the TLD Makefile
+ ARG BASE_VERSION=latest
+-ARG ISTIO_BASE_REGISTRY=gcr.io/istio-release
++ARG ISTIO_BASE_REGISTRY=lcr.loongnix.cn/istio
+ 
+ # The following section is used as base image if BASE_DISTRIBUTION=debug
+ FROM ${ISTIO_BASE_REGISTRY}/base:${BASE_VERSION} as debug
+@@ -15,12 +15,13 @@ FROM ${ISTIO_BASE_REGISTRY}/distroless:${BASE_VERSION} as distroless
+ # hadolint ignore=DL3006
+ FROM ${BASE_DISTRIBUTION:-debug}
+ 
+-ARG TARGETARCH
+-COPY ${TARGETARCH:-amd64}/pilot-discovery /usr/local/bin/pilot-discovery
++COPY pilot-discovery /usr/local/bin/pilot-discovery
+ 
+ # Copy templates for bootstrap generation.
+-COPY envoy_bootstrap.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
+-COPY gcp_envoy_bootstrap.json /var/lib/istio/envoy/gcp_envoy_bootstrap_tmpl.json
++#COPY envoy_bootstrap.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
++COPY tools/packaging/common/envoy_bootstrap.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
++#COPY gcp_envoy_bootstrap.json /var/lib/istio/envoy/gcp_envoy_bootstrap_tmpl.json
++COPY tools/packaging/common/gcp_envoy_bootstrap.json /var/lib/istio/envoy/gcp_envoy_bootstrap_tmpl.json
+ 
+ USER 1337:1337
+ 
+-- 
+2.38.1
+
