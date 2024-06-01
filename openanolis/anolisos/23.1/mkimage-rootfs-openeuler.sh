@@ -19,7 +19,10 @@ fi
 
 output="AnolisOS-${version}.rootfs.${arch}.tar.gz"
 
-repos_baseos_url="https://build.openanolis.cn/kojifiles/rsync/anolis/23.1/isos/GA/loongarch64/"
+repos_baseos_url="https://eulermaker.compass-ci.openeuler.openatom.cn/api/ems3/repositories/openEuler-24.03-LTS-everything:loongarch/openEuler%3A24.03-LTS/loongarch64/"
+#repos_baseos_url_1="http://10.130.0.6/openEuler-24.03-new/"
+#repos_baseos_url_1="https://eulermaker.compass-ci.openeuler.openatom.cn/api/ems4/repositories/openEuler-master:everything/openEuler%3Amainline/loongarch64/"
+repos_baseos_url_2="https://eulermaker.compass-ci.openeuler.openatom.cn/api/ems2/repositories/openEuler-24.03-LTS-Baseos/openEuler%3A24.03-LTS/loongarch64/"
 
 trap cleanup TERM EXIT
 
@@ -31,12 +34,13 @@ repo_conf="${repo_dir}/AnolisOS.repo"
 setting_scripts=setting.sh
 
 pkg_list="
- basesystem bash ca-certificates anolis-gpg-keys anolis-release
- anolis-repos chkconfig cracklib crypto-policies  dnf passwd
+ basesystem bash ca-certificates openEuler-release openEuler-gpg-keys
+ openEuler-repos chkconfig cracklib crypto-policies  dnf
  expat gawk gdbm glib2 glibc gmp gnupg2 gpgme grep ima-evm-utils
- json-c mpfr ncurses-base procps rpm-build git findutils dnf-plugins-core
+ json-c mpfr ncurses-base procps rpm rpm-build git findutils dnf-plugins-core
  npth p11-kit p11-kit-trust pcre pcre2 popt readline rootfiles
  rpm sed setup systemd systemd-libs tzdata util-linux vim-minimal xz yum
+ git git-core make gcc procps rpm-build findutils dnf-plugins-core tigervnc-server-module 
 "
 #pkg_list="
 # acl basesystem bash ca-certificates anolis-gpg-keys anolis-release
@@ -62,13 +66,28 @@ mkdir -pv ${repo_dir} || :
 ####################################################################
 cat > ${repo_conf} << EOF
 [baseos]
-name=AnolisOS-$releasever-baseos
+name=AnolisOS-$releasever
 baseurl=${repos_baseos_url}
 gpgcheck=0
 enabled=1
 priority=1
 excludepkgs="${exclude_pkgs}"
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-LOONGNIX
+#[baseos-1]
+#name=AnolisOS-$releasever-1
+#baseurl=${repos_baseos_url_1}
+#gpgcheck=0
+#enabled=1
+#priority=1
+#excludepkgs="${exclude_pkgs}"
+#gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-LOONGNIX
+[baseos-2]
+name=AnolisOS-$releasever-2
+baseurl=${repos_baseos_url_2}
+gpgcheck=0
+enabled=1
+priority=3
+excludepkgs="${exclude_pkgs}"
 EOF
 ####################################################################
 
@@ -104,9 +123,9 @@ LANG="en_US"
 echo "%_install_langs $LANG" > /etc/rpm/macros.image-language-conf
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
-pushd /usr/share/locale > /dev/null
-	ls | egrep -x -v "en|en@arabic|en@boldquot|en@cyrillic|en@greek|en@hebrew|en@piglatin|en@quot|en@shaw|en_CA|en_GB|en_US|locale.alias" | xargs rm -rf
-popd > /dev/null
+#pushd /usr/share/locale > /dev/null
+#	ls | egrep -x -v "en|en@arabic|en@boldquot|en@cyrillic|en@greek|en@hebrew|en@piglatin|en@quot|en@shaw|en_CA|en_GB|en_US|locale.alias" | xargs rm -rf
+#popd > /dev/null
 
 # systemd fixes
 :> /etc/machine-id
@@ -137,12 +156,12 @@ chmod +x ${rootfs}/${setting_scripts}
 chroot   ${rootfs} /${setting_scripts}
 
 ##解决在rootfs中su命令没有权限问题
-file_list="fingerprint-auth password-auth postlogin smartcard-auth system-auth user-profile"
-for file in ${file_list}
-do
-        chroot ${rootfs} authselect create-profile ${file}
-        chroot ${rootfs} ln -s /etc/authselect/custom/${file} /etc/pam.d/${file}
-done
+#file_list="fingerprint-auth password-auth postlogin smartcard-auth system-auth user-profile"
+#for file in ${file_list}
+#do
+#        chroot ${rootfs} authselect create-profile ${file}
+#        chroot ${rootfs} ln -s /etc/authselect/custom/${file} /etc/pam.d/${file}
+#done
 
 ##解决在chroot中/dev/null没有权限问题
 chroot ${rootfs} rm -rf /dev/null

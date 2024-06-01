@@ -3,7 +3,7 @@
 #
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
-FROM lcr.loongnix.cn/library/alpine:3.19
+FROM lcr.loongnix.cn/library/alpine:3.18
 LABEL maintainer="yangzewei@loongson.cn"
 
 ENV NGINX_VERSION 1.23.1

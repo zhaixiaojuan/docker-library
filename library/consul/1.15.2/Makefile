@@ -2,8 +2,8 @@
 
 REGISTRY?=lcr.loongnix.cn
 ORGANIZATION?=library
-REPOSITORY?=elasticsearch
-TAG?=7.13.0-no-mlcpp
+REPOSITORY?=consul
+TAG?=1.15.2
 LATEST?=true
 
 IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
@@ -13,7 +13,7 @@ default: image
 
 image:
 	docker build \
-		--no-cache \
+		--build-arg https_proxy=$(https_proxy) \
 		-t $(IMAGE) \
 		.
 

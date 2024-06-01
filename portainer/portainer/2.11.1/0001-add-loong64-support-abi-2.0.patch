@@ -1,0 +1,219 @@
+From 718e9ccdbb3e76471f14f2fc03e5eba9b70a7552 Mon Sep 17 00:00:00 2001
+From: yzewei <yangzewei@loongson.cn>
+Date: Tue, 21 May 2024 10:48:47 +0800
+Subject: [PATCH] add loong64 support (abi-2.0)
+
+Signed-off-by: yzewei <yangzewei@loongson.cn>
+---
+ api/database/boltdb/db.go               |  2 +-
+ api/database/boltdb/export.go           |  2 +-
+ api/go.mod                              | 10 +++++-----
+ api/go.sum                              | 21 ++++++++++++++-------
+ build/download_docker_compose_binary.sh | 14 ++++++++++----
+ build/linux/Dockerfile                  |  4 +++-
+ build/linux/alpine.Dockerfile           |  5 +++--
+ 7 files changed, 37 insertions(+), 21 deletions(-)
+
+diff --git a/api/database/boltdb/db.go b/api/database/boltdb/db.go
+index 8ffe14b..e35a8a1 100644
+--- a/api/database/boltdb/db.go
++++ b/api/database/boltdb/db.go
+@@ -10,7 +10,7 @@ import (
+ 	"path"
+ 	"time"
+ 
+-	"github.com/boltdb/bolt"
++	bolt "go.etcd.io/bbolt"
+ 	dserrors "github.com/portainer/portainer/api/dataservices/errors"
+ 	"github.com/sirupsen/logrus"
+ )
+diff --git a/api/database/boltdb/export.go b/api/database/boltdb/export.go
+index 3d04f2a..531dc26 100644
+--- a/api/database/boltdb/export.go
++++ b/api/database/boltdb/export.go
+@@ -4,7 +4,7 @@ import (
+ 	"encoding/json"
+ 	"time"
+ 
+-	"github.com/boltdb/bolt"
++	bolt "go.etcd.io/bbolt"
+ 	"github.com/sirupsen/logrus"
+ )
+ 
+diff --git a/api/go.mod b/api/go.mod
+index 8619507..3f59dc7 100644
+--- a/api/go.mod
++++ b/api/go.mod
+@@ -8,7 +8,6 @@ require (
+ 	github.com/aws/aws-sdk-go-v2 v1.11.1
+ 	github.com/aws/aws-sdk-go-v2/credentials v1.6.2
+ 	github.com/aws/aws-sdk-go-v2/service/ecr v1.10.1
+-	github.com/boltdb/bolt v1.3.1
+ 	github.com/coreos/go-semver v0.3.0
+ 	github.com/dchest/uniuri v0.0.0-20160212164326-8902c56451e9
+ 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+@@ -37,12 +36,13 @@ require (
+ 	github.com/rkl-/digest v0.0.0-20180419075440-8316caa4a777
+ 	github.com/robfig/cron/v3 v3.0.1
+ 	github.com/sirupsen/logrus v1.8.1
+-	github.com/stretchr/testify v1.7.0
++	github.com/stretchr/testify v1.8.1
++	go.etcd.io/bbolt v1.3.10
+ 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
+ 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
++	golang.org/x/sync v0.5.0
+ 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
+-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
++	gopkg.in/yaml.v3 v3.0.1
+ 	k8s.io/api v0.22.2
+ 	k8s.io/apimachinery v0.22.2
+ 	k8s.io/client-go v0.22.2
+@@ -102,7 +102,7 @@ require (
+ 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
+ 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
+ 	golang.org/x/net v0.0.0-20210520170846-37e1c6afe023 // indirect
+-	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect
++	golang.org/x/sys v0.20.0 // indirect
+ 	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d // indirect
+ 	golang.org/x/text v0.3.6 // indirect
+ 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
+diff --git a/api/go.sum b/api/go.sum
+index b04a82a..844d282 100644
+--- a/api/go.sum
++++ b/api/go.sum
+@@ -112,8 +112,6 @@ github.com/bits-and-blooms/bitset v1.2.0/go.mod h1:gIdJ4wp64HaoK2YrL1Q5/N7Y16edY
+ github.com/blang/semver v3.1.0+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
+ github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnwebNt5EWlYSAyrTnjyyk=
+ github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869/go.mod h1:Ekp36dRnpXw/yCqJaO+ZrUyxD+3VXMFFr56k5XYrpB4=
+-github.com/boltdb/bolt v1.3.1 h1:JQmyP4ZBrce+ZQu0dY660FMfatumYDLun9hBCUVIkF4=
+-github.com/boltdb/bolt v1.3.1/go.mod h1:clJnj/oiGkjum5o1McbSZDSLxVThjynRyGBgiAx27Ps=
+ github.com/bshuster-repo/logrus-logstash-hook v0.4.1/go.mod h1:zsTqEiSzDgAa/8GZR7E1qaXrhYNDKBYy5/dWPTIflbk=
+ github.com/buger/jsonparser v0.0.0-20180808090653-f4dd9f5a6b44/go.mod h1:bbYlZJ7hK1yFx9hf58LP0zeX7UjIGs20ufpu3evjr+s=
+ github.com/bugsnag/bugsnag-go v0.0.0-20141110184014-b1d153021fcd/go.mod h1:2oa8nejYd4cQ/b0hMIopN0lCRxU0bueqREvZLWFrtK8=
+@@ -697,14 +695,19 @@ github.com/stretchr/objx v0.0.0-20180129172003-8a3f7159479f/go.mod h1:HFkY916IF+
+ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+ github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+ github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=
++github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
++github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=
+ github.com/stretchr/testify v0.0.0-20180303142811-b89eecf5ca5d/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
+ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
+ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
+ github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
+ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
+ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+-github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
+ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
++github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
++github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
++github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
++github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
+ github.com/syndtr/gocapability v0.0.0-20170704070218-db04d3cc01c8/go.mod h1:hkRG7XYTFWNJGYcbNJQlaLq0fg1yr4J4t/NcTQtrfww=
+ github.com/syndtr/gocapability v0.0.0-20180916011248-d98352740cb2/go.mod h1:hkRG7XYTFWNJGYcbNJQlaLq0fg1yr4J4t/NcTQtrfww=
+ github.com/syndtr/gocapability v0.0.0-20200815063812-42c35b437635/go.mod h1:hkRG7XYTFWNJGYcbNJQlaLq0fg1yr4J4t/NcTQtrfww=
+@@ -747,6 +750,8 @@ github.com/yvasiyarov/newrelic_platform_go v0.0.0-20140908184405-b21fdbd4370f/go
+ go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
+ go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
+ go.etcd.io/bbolt v1.3.5/go.mod h1:G5EMThwa9y8QZGBClrRx5EY+Yw9kAhnjy3bSjsnlVTQ=
++go.etcd.io/bbolt v1.3.10 h1:+BqfJTcCzTItrop8mq/lbzL8wSGtj94UO/3U31shqG0=
++go.etcd.io/bbolt v1.3.10/go.mod h1:bK3UQLPJZly7IlNmV7uVHJDxfe5aK9Ll93e/74Y9oEQ=
+ go.etcd.io/etcd v0.5.0-alpha.5.0.20200910180754-dd1b699fc489/go.mod h1:yVHk9ub3CSBatqGNg7GRmsnfLWtoW60w4eDYfh7vHDg=
+ go.mozilla.org/pkcs7 v0.0.0-20200128120323-432b2356ecb1/go.mod h1:SNgMg+EgDFwmvSmLRTNKC5fegJjB7v23qTQ0XLGUNHk=
+ go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
+@@ -858,8 +863,8 @@ golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e/go.mod h1:RxMgew5VJxzue5/jJ
+ golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
+ golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
+ golang.org/x/sync v0.0.0-20201207232520-09787c993a3a/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
+-golang.org/x/sync v0.0.0-20210220032951-036812b2e83c h1:5KslGYwFpkhGh+Q16bwMP3cOontH8FOep7tGV86Y7SQ=
+-golang.org/x/sync v0.0.0-20210220032951-036812b2e83c/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
++golang.org/x/sync v0.5.0 h1:60k92dhOjHxJkrqnwsfl8KuaHbn/5dl0lUPUklKo3qE=
++golang.org/x/sync v0.5.0/go.mod h1:Czt+wKu1gCyEFDUtn0jG5QVvpJ6rzVqr5aXyt9drQfk=
+ golang.org/x/sys v0.0.0-20180830151530-49385e6e1522/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+ golang.org/x/sys v0.0.0-20180905080454-ebe1bf3edb33/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+ golang.org/x/sys v0.0.0-20180909124046-d0be0721c37e/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+@@ -924,8 +929,9 @@ golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4/go.mod h1:h1NjWce9XRLGQEsW7w
+ golang.org/x/sys v0.0.0-20210324051608-47abb6519492/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+ golang.org/x/sys v0.0.0-20210423082822-04245dca01da/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+ golang.org/x/sys v0.0.0-20210426230700-d19ff857e887/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+-golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 h1:RqytpXGR1iVNX7psjB3ff8y7sNFinVFvkx1c8SjBkio=
+ golang.org/x/sys v0.0.0-20210616094352-59db8d763f22/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
++golang.org/x/sys v0.20.0 h1:Od9JTbYCk261bKm4M/mw7AklTlFYIa0bIp9BgSm1S8Y=
++golang.org/x/sys v0.20.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
+ golang.org/x/term v0.0.0-20201117132131-f5c789dd3221/go.mod h1:Nr5EML6q2oocZ2LXRh80K7BxOlk5/8JxuGnuhpl+muw=
+ golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
+ golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d h1:SZxvLBoTP5yHO3Frd4z4vrF+DBX9vMVanchswa69toE=
+@@ -1093,8 +1099,9 @@ gopkg.in/yaml.v2 v2.4.0 h1:D8xgwECY7CYvx+Y2n4sBz93Jn9JRvxdiyyo8CTfuKaY=
+ gopkg.in/yaml.v2 v2.4.0/go.mod h1:RDklbk79AGWmwhnvt/jBztapEOGDOx6ZbXqjP6csGnQ=
+ gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+ gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+-gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b h1:h8qDotaEPuJATrMmW04NCwg7v22aHH28wwpauUhK9Oo=
+ gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
++gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
++gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+ gotest.tools v2.2.0+incompatible h1:VsBPFP1AI068pPrMxtb/S8Zkgf9xEmTLJjfM+P5UIEo=
+ gotest.tools v2.2.0+incompatible/go.mod h1:DsYFclhRJ6vuDpmuTbkuFWG+y2sxOXAzmJt81HFBacw=
+ gotest.tools/v3 v3.0.2/go.mod h1:3SzNCllyD9/Y+b5r9JIKQ474KzkZyqLqEfYqMsX94Bk=
+diff --git a/build/download_docker_compose_binary.sh b/build/download_docker_compose_binary.sh
+index 63ea5b0..a3181db 100755
+--- a/build/download_docker_compose_binary.sh
++++ b/build/download_docker_compose_binary.sh
+@@ -45,13 +45,19 @@ function download_plugin() {
+         FILENAME="$FILENAME.exe"
+         TARGET_FILENAME="$TARGET_FILENAME.exe"
+     fi
+-    
+-    wget -O "dist/$TARGET_FILENAME" "https://github.com/docker/compose-cli/releases/download/v$PLUGIN_VERSION/$FILENAME"
+-    chmod +x "dist/$TARGET_FILENAME"
++   
++    if [[ "$PLATFORM" == "loong64" ]]; then
++        URL="http://cloud.loongnix.cn/releases/loongarch64/docker/compose/2.22.0/docker-compose-loong64-v2.22.0-rc.1.tar.gz"
++        wget -O "dist/$TARGET_FILENAME" $URL
++        chmod +x "dist/$TARGET_FILENAME"
++    fi
++
++#    wget -O "dist/$TARGET_FILENAME" "https://github.com/docker/compose-cli/releases/download/v$PLUGIN_VERSION/$FILENAME"
++#    chmod +x "dist/$TARGET_FILENAME"
+ }
+ 
+ if [ "${PLATFORM}" == 'linux' ] && [ "${ARCH}" != 'amd64' ]; then
+     download_plugin "$PLATFORM" "$ARCH" "$DOCKER_COMPOSE_VERSION"
+ fi
+ 
+-download_binary "$PLATFORM" "$ARCH" "$DOCKER_COMPOSE_VERSION"
+\ No newline at end of file
++download_binary "$PLATFORM" "$ARCH" "$DOCKER_COMPOSE_VERSION"
+diff --git a/build/linux/Dockerfile b/build/linux/Dockerfile
+index c07dc6d..bec8ef7 100644
+--- a/build/linux/Dockerfile
++++ b/build/linux/Dockerfile
+@@ -1,6 +1,8 @@
+-FROM portainer/base
++FROM lcr.loongnix.cn/portainer/base:latest
+ 
+ COPY dist /
++COPY public /public
++COPY storybook /storybook
+ 
+ VOLUME /data
+ WORKDIR /
+diff --git a/build/linux/alpine.Dockerfile b/build/linux/alpine.Dockerfile
+index 6108c4c..053c11d 100644
+--- a/build/linux/alpine.Dockerfile
++++ b/build/linux/alpine.Dockerfile
+@@ -1,4 +1,4 @@
+-FROM alpine:latest
++FROM lcr.loongnix.cn/library/alpine:3.18
+ 
+ COPY dist /
+ 
+@@ -9,4 +9,5 @@ EXPOSE 9000
+ EXPOSE 9443
+ EXPOSE 8000
+ 
+-ENTRYPOINT ["/portainer"]
++#ENTRYPOINT ["/portainer"]
++ENTRYPOINT ["/bin/sh"]
+-- 
+2.41.0
+
