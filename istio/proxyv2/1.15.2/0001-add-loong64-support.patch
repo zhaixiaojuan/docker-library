@@ -1,0 +1,219 @@
+From 81c8cb57eae55bb0a66b13159486b3d1f82d7b72 Mon Sep 17 00:00:00 2001
+From: zhaixiaojuan <zhaixiaojuan@loongson.cn>
+Date: Thu, 13 Jun 2024 16:00:19 +0800
+Subject: [PATCH] add loong64 support
+
+Signed-off-by: zhaixiaojuan <zhaixiaojuan@loongson.cn>
+---
+ common/scripts/setup_env.sh     |  8 +++++---
+ docker/Dockerfile.base          |  6 ++++--
+ docker/Dockerfile.distro_source | 17 +++++++++++++++++
+ docker/Dockerfile.distroless    | 12 +++++++-----
+ pilot/docker/Dockerfile.pilot   | 14 ++++++++------
+ pilot/docker/Dockerfile.proxyv2 | 23 +++++++++++++++--------
+ 6 files changed, 56 insertions(+), 24 deletions(-)
+ create mode 100644 docker/Dockerfile.distro_source
+
+diff --git a/common/scripts/setup_env.sh b/common/scripts/setup_env.sh
+index d411ddc..1b42534 100755
+--- a/common/scripts/setup_env.sh
++++ b/common/scripts/setup_env.sh
+@@ -49,6 +49,8 @@ elif [[ ${LOCAL_ARCH} == s390x ]]; then
+     TARGET_ARCH=s390x
+ elif [[ ${LOCAL_ARCH} == ppc64le ]]; then
+     TARGET_ARCH=ppc64le
++elif [[ ${LOCAL_ARCH} == loongarch64 ]]; then
++    TARGET_ARCH=loong64
+ else
+     echo "This system's architecture, ${LOCAL_ARCH}, isn't supported"
+     exit 1
+@@ -73,10 +75,10 @@ fi
+ 
+ # Build image to use
+ if [[ "${IMAGE_VERSION:-}" == "" ]]; then
+-  IMAGE_VERSION=release-1.15-75433625529f5fb0124f158bbc4d8a760a8f097a
++  IMAGE_VERSION=sid
+ fi
+ if [[ "${IMAGE_NAME:-}" == "" ]]; then
+-  IMAGE_NAME=build-tools
++  IMAGE_NAME=lcr.loongnix.cn/library/debian
+ fi
+ 
+ DOCKER_GID="${DOCKER_GID:-$(grep '^docker:' /etc/group | cut -f3 -d:)}"
+@@ -89,7 +91,7 @@ TARGET_OUT_LINUX="${TARGET_OUT_LINUX:-$(pwd)/out/linux_${TARGET_ARCH}}"
+ CONTAINER_TARGET_OUT="${CONTAINER_TARGET_OUT:-/work/out/${TARGET_OS}_${TARGET_ARCH}}"
+ CONTAINER_TARGET_OUT_LINUX="${CONTAINER_TARGET_OUT_LINUX:-/work/out/linux_${TARGET_ARCH}}"
+ 
+-IMG="${IMG:-gcr.io/istio-testing/${IMAGE_NAME}:${IMAGE_VERSION}}"
++IMG="${IMG:-${IMAGE_NAME}:${IMAGE_VERSION}}"
+ 
+ CONTAINER_CLI="${CONTAINER_CLI:-docker}"
+ 
+diff --git a/docker/Dockerfile.base b/docker/Dockerfile.base
+index 2d383f3..9033eff 100644
+--- a/docker/Dockerfile.base
++++ b/docker/Dockerfile.base
+@@ -1,4 +1,6 @@
+-FROM ubuntu:jammy
++FROM lcr.loongnix.cn/library/debian:sid
++
++LABEL maintainer = "Zewei Yang <yangzewei@loongson.cn>"
+ 
+ ENV DEBIAN_FRONTEND=noninteractive
+ 
+@@ -15,7 +17,7 @@ RUN apt-get update && \
+   iproute2 \
+   iputils-ping \
+   knot-dnsutils \
+-  netcat \
++  netcat.traditional \
+   tcpdump \
+   conntrack \
+   bsdmainutils \
+diff --git a/docker/Dockerfile.distro_source b/docker/Dockerfile.distro_source
+new file mode 100644
+index 0000000..d670146
+--- /dev/null
++++ b/docker/Dockerfile.distro_source
+@@ -0,0 +1,17 @@
++# 使用Debian的基础镜像  
++FROM lcr.loongnix.cn/library/debian:sid
++  
++# 创建一个新的用户组，名为nonroot，ID为65532（通常用户组ID和用户ID是分开的，但这里为了简单起见我们让它们相同）  
++RUN groupadd -g 65532 nonroot  
++  
++# 创建一个新用户，名为nonroot，ID为65532，并将其添加到nonroot组中  
++RUN useradd -u 65532 -g nonroot -m -s /bin/bash nonroot  
++  
++# 设置非root用户为默认用户  
++USER nonroot  
++  
++# （可选）安装一些软件包或进行其他设置  
++# RUN apt-get update && apt-get install -y --no-install-recommends some-package  
++  
++# 设置容器启动时执行的命令（这里只是一个示例，你可能需要替换为你自己的命令）  
++CMD ["/bin/bash"]
+diff --git a/docker/Dockerfile.distroless b/docker/Dockerfile.distroless
+index cd14e8b..f3b790b 100644
+--- a/docker/Dockerfile.distroless
++++ b/docker/Dockerfile.distroless
+@@ -1,8 +1,10 @@
+ # prepare a distroless source context to copy files from
+-FROM gcr.io/distroless/static-debian11@sha256:f4787e810dbc39dd59fcee319cf88e8a01181e1758dbd07c32ed4e14a9ba8904 as distroless_source
++#FROM gcr.io/distroless/static-debian11@sha256:6d31326376a7834b106f281b04f67b5d015c31732f594930f2ea81365f99d60c as distroless_source
++FROM lcr.loongnix.cn/istio/distro_source:1.15.2 as distroless_source
+ 
+ # prepare a base dev to modify file contents
+-FROM ubuntu:focal as ubuntu_source
++#FROM ubuntu:focal as ubuntu_source
++FROM lcr.loongnix.cn/library/debian:sid as debian_source
+ 
+ # Modify contents of container
+ COPY --from=distroless_source /etc/ /home/etc
+@@ -15,6 +17,6 @@ RUN echo istio-proxy:x:1337:1337:istio-proxy:/nonexistent:/sbin/nologin >> /home
+ # - groups file
+ # - /home/nonroot directory
+ FROM distroless_source
+-COPY --from=ubuntu_source /home/etc/passwd /etc/passwd
+-COPY --from=ubuntu_source /home/etc/group /etc/group
+-COPY --from=ubuntu_source /home/nonroot /home/nonroot
+\ No newline at end of file
++COPY --from=debian_source /home/etc/passwd /etc/passwd
++COPY --from=debian_source /home/etc/group /etc/group
++COPY --from=debian_source /home/nonroot /home/nonroot
+diff --git a/pilot/docker/Dockerfile.pilot b/pilot/docker/Dockerfile.pilot
+index fe2c87e..ff08da7 100644
+--- a/pilot/docker/Dockerfile.pilot
++++ b/pilot/docker/Dockerfile.pilot
+@@ -3,23 +3,25 @@ ARG BASE_DISTRIBUTION=debug
+ 
+ # Version is the base image version from the TLD Makefile
+ ARG BASE_VERSION=latest
++ARG ISTIO_BASE_REGISTRY=lcr.loongnix.cn/istio
+ 
+ # The following section is used as base image if BASE_DISTRIBUTION=debug
+-FROM gcr.io/istio-release/base:${BASE_VERSION} as debug
++FROM ${ISTIO_BASE_REGISTRY}/base:${BASE_VERSION} as debug
+ 
+ # The following section is used as base image if BASE_DISTRIBUTION=distroless
+-FROM gcr.io/istio-release/distroless:${BASE_VERSION} as distroless
++FROM ${ISTIO_BASE_REGISTRY}/distroless:${BASE_VERSION} as distroless
+ 
+ # This will build the final image based on either debug or distroless from above
+ # hadolint ignore=DL3006
+ FROM ${BASE_DISTRIBUTION:-debug}
+ 
+-ARG TARGETARCH
+-COPY ${TARGETARCH:-amd64}/pilot-discovery /usr/local/bin/pilot-discovery
++COPY pilot-discovery /usr/local/bin/pilot-discovery
+ 
+ # Copy templates for bootstrap generation.
+-COPY envoy_bootstrap.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
+-COPY gcp_envoy_bootstrap.json /var/lib/istio/envoy/gcp_envoy_bootstrap_tmpl.json
++#COPY envoy_bootstrap.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
++COPY tools/packaging/common/envoy_bootstrap.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
++#COPY gcp_envoy_bootstrap.json /var/lib/istio/envoy/gcp_envoy_bootstrap_tmpl.json
++COPY tools/packaging/common/gcp_envoy_bootstrap.json /var/lib/istio/envoy/gcp_envoy_bootstrap_tmpl.json
+ 
+ USER 1337:1337
+ 
+diff --git a/pilot/docker/Dockerfile.proxyv2 b/pilot/docker/Dockerfile.proxyv2
+index 338946a..5822420 100644
+--- a/pilot/docker/Dockerfile.proxyv2
++++ b/pilot/docker/Dockerfile.proxyv2
+@@ -3,16 +3,19 @@ ARG BASE_DISTRIBUTION=debug
+ 
+ # Version is the base image version from the TLD Makefile
+ ARG BASE_VERSION=latest
++ARG ISTIO_BASE_REGISTRY=lcr.loongnix.cn/istio
+ 
+ # The following section is used as base image if BASE_DISTRIBUTION=debug
+-FROM gcr.io/istio-release/base:${BASE_VERSION} as debug
++#FROM gcr.io/istio-release/base:${BASE_VERSION} as debug
++FROM ${ISTIO_BASE_REGISTRY}/base:${BASE_VERSION} as debug
+ 
+ # The following section is used as base image if BASE_DISTRIBUTION=distroless
+ # This image is a custom built debian11 distroless image with multiarchitecture support.
+ # It is built on the base distroless image, with iptables binary and libraries added
+ # The source can be found at https://github.com/istio/distroless/tree/iptables
+ # This version is from commit a8b3fb577adb785211ce704fdf892983fc268b11.
+-FROM gcr.io/istio-release/iptables@sha256:4be99c4dbc0a158fc4404d66198bf18f321292ffeff55201e9c8fa518a54b81e as distroless
++#FROM gcr.io/istio-release/iptables@sha256:4be99c4dbc0a158fc4404d66198bf18f321292ffeff55201e9c8fa518a54b81e as distroless
++FROM ${ISTIO_BASE_REGISTRY}/distroless:${BASE_VERSION} as distroless
+ 
+ # This will build the final image based on either debug or distroless from above
+ # hadolint ignore=DL3006
+@@ -25,20 +28,24 @@ ARG istio_version
+ ARG SIDECAR=envoy
+ 
+ # Copy Envoy bootstrap templates used by pilot-agent
+-COPY envoy_bootstrap.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
+-COPY gcp_envoy_bootstrap.json /var/lib/istio/envoy/gcp_envoy_bootstrap_tmpl.json
++#COPY envoy_bootstrap.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
++COPY tools/packaging/common/envoy_bootstrap.json /var/lib/istio/envoy/envoy_bootstrap_tmpl.json
++#COPY gcp_envoy_bootstrap.json /var/lib/istio/envoy/gcp_envoy_bootstrap_tmpl.json
++COPY tools/packaging/common/gcp_envoy_bootstrap.json /var/lib/istio/envoy/gcp_envoy_bootstrap_tmpl.json
+ 
+ # Install Envoy.
+-ARG TARGETARCH
+-COPY ${TARGETARCH:-amd64}/${SIDECAR} /usr/local/bin/${SIDECAR}
++#ARG TARGETARCH
++#COPY ${TARGETARCH:-amd64}/${SIDECAR} /usr/local/bin/${SIDECAR}
++COPY ${SIDECAR}-static /usr/local/bin/${SIDECAR}
+ 
+ # Environment variable indicating the exact proxy sha - for debugging or version-specific configs
+ ENV ISTIO_META_ISTIO_PROXY_SHA $proxy_version
+ # Environment variable indicating the exact build, for debugging
+ ENV ISTIO_META_ISTIO_VERSION $istio_version
+ 
+-ARG TARGETARCH
+-COPY ${TARGETARCH:-amd64}/pilot-agent /usr/local/bin/pilot-agent
++#ARG TARGETARCH
++#COPY ${TARGETARCH:-amd64}/pilot-agent /usr/local/bin/pilot-agent
++COPY pilot-agent /usr/local/bin/pilot-agent
+ 
+ COPY stats-filter.wasm /etc/istio/extensions/stats-filter.wasm
+ COPY stats-filter.compiled.wasm /etc/istio/extensions/stats-filter.compiled.wasm
+-- 
+2.38.1
+
