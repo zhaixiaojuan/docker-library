@@ -1,91 +1,18 @@
 FROM lcr.loongnix.cn/library/alpine:3.19
 
-RUN apk add --no-cache ca-certificates
-
-# set up nsswitch.conf for Go's "netgo" implementation
-# - https://github.com/golang/go/blob/go1.9.1/src/net/conf.go#L194-L275
-# - docker run --rm debian grep '^hosts:' /etc/nsswitch.conf
-#RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
+RUN apk --no-cache upgrade
+RUN apk add --no-cache ca-certificates gcc musl-dev bash wget
 
 ENV PATH /usr/local/go/bin:$PATH
-
-ENV GOLANG_VERSION 1.21.0
-
-# Bootstrap for Go1.21 requires minimum Go1.17, now build Go1.19 as bootstrap for Go1.21.x
-RUN set -eux; \
-	build=1; \
-	url='http://ftp.loongnix.cn/toolchain/golang/go-1.19/abi2.0/go1.19.7.src.tar.gz'; \
-	sha256='cf3d38154f15b64d141800e3a98dbd73df7c829eec87ebe2df1d5c7c93013206'; \
-	export GOARCH='loong64' GOOS='linux'; \
-	\
-	wget -O go.tgz "$url"; \
-	echo "$sha256 *go.tgz" | sha256sum -c -; \
-	\
-	tar -C /usr/local -xzf go.tgz; \
-	rm go.tgz; \
-	\
-	apk add --no-cache --virtual .build-deps bash gcc go musl-dev; \
-	\
-	cd /usr/local/go/src; \
-	export GOCACHE='/tmp/gocache'; \
-	export GOROOT_BOOTSTRAP="$(go env GOROOT)" GOHOSTOS="$GOOS" GOHOSTARCH="$GOARCH"; \
-	./make.bash; \
-	\
-	cd ../../ && mv go go-bootstrap; \
-	rm -rf "$GOCACHE"; \
-	\
-	/usr/local/go-bootstrap/bin/go version
-
+ENV GOLANG_VERSION 1.21.11
 
 RUN set -eux; \
-	build=1; \
-# https://github.com/golang/go/issues/38536#issuecomment-616897960
-	url='http://ftp.loongnix.cn/toolchain/golang/go-1.21/abi2.0/go1.21.0.src.tar.gz'; \
-	sha256='8734d66ac4ac4d22fb6faae8155abc5a2e38cd3c2954b5377e9d4cfbbf566f34'; \
-	export GOARCH='loong64' GOOS='linux'; \
-	\
-	wget -O go.tgz "$url"; \
+	url='http://ftp.loongnix.cn/toolchain/golang/go-1.21/abi2.0/go1.21.11.linux-loong64.tar.gz'; \
+	sha256='687ac8a0cd69923422489e0985c53edac6b0e30e789f61f3cd66624d05185827'; \
+	wget -O go.tgz "$url" --progress=dot:giga; \
 	echo "$sha256 *go.tgz" | sha256sum -c -; \
-	\
 	tar -C /usr/local -xzf go.tgz; \
 	rm go.tgz; \
-	\
-	if [ -n "$build" ]; then \
-		apk add --no-cache --virtual .build-deps \
-			bash \
-			gcc \
-			go \
-			musl-dev \
-		; \
-		\
-		export GOCACHE='/tmp/gocache'; \
-		\
-		( \
-			cd /usr/local/go/src; \
-# set GOROOT_BOOTSTRAP + GOHOST* such that we can build Go successfully
-			export GOROOT_BOOTSTRAP="/usr/local/go-bootstrap" GOHOSTOS="$GOOS" GOHOSTARCH="$GOARCH"; \
-			if [ "${GOARCH:-}" = '386' ]; then \
-# https://github.com/golang/go/issues/52919; https://github.com/docker-library/golang/pull/426#issuecomment-1152623837
-				export CGO_CFLAGS='-fno-stack-protector'; \
-			fi; \
-			./make.bash; \
-		); \
-		\
-		apk del --no-network .build-deps; \
-		\
-# remove a few intermediate / bootstrapping files the official binary release tarballs do not contain
-		rm -rf \
-			/usr/local/go/pkg/*/cmd \
-			/usr/local/go/pkg/bootstrap \
-			/usr/local/go/pkg/obj \
-			/usr/local/go/pkg/tool/*/api \
-			/usr/local/go/pkg/tool/*/go_bootstrap \
-			/usr/local/go/src/cmd/dist/dist \
-			"$GOCACHE" \
-			/usr/local/go-bootstrap \
-		; \
-	fi; \
-	\
 	go version
 
 ENV GOPATH /go
