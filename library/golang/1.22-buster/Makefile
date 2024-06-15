@@ -3,11 +3,11 @@
 REGISTRY     ?= lcr.loongnix.cn
 ORGANIZATION ?= library
 REPOSITORY   ?= golang
-TAG          ?= 1.21-buster
+TAG          ?= 1.22-buster
 
 IMAGE  = $(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(TAG)
-ALIAS  = $(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):1.21
-LATEST =
+ALIAS  = $(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):1.22
+LATEST = $(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):latest
 
 default: image
 
@@ -19,7 +19,6 @@ image:
 push: alias
 	docker push $(IMAGE)
 	docker push $(ALIAS)
-
 	@if [ -n $(LATEST) ]; then \
 		docker tag $(IMAGE) $(LATEST); \
 		docker push $(LATEST); \
