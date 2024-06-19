@@ -1,50 +1,8 @@
-From cbe04d5b8c93f999027da5b1f8a77d497b88ee47 Mon Sep 17 00:00:00 2001
-From: yzewei <yangzewei@loongson.cn>
-Date: Tue, 7 May 2024 15:14:11 +0800
-Subject: [PATCH] add loong64 support (abi-2.0)
+commit dc72226fd2ed204faf593f112eb6a2b238b265e7
+Author: zhaixiaojuan <zhaixiaojuan@loongson.cn>
+Date:   Wed Jun 26 14:45:47 2024 +0800
 
-Signed-off-by: yzewei <yangzewei@loongson.cn>
----
- apiserver/Makefile                            |  7 ++-
- apiserver/docker-image/Dockerfile.loong64     | 25 +++++++++
- app-policy/Dockerfile.loong64                 |  5 ++
- app-policy/Makefile                           |  5 +-
- calicoctl/Dockerfile.loong64                  | 13 +++++
- calicoctl/Makefile                            |  5 +-
- cni-plugin/Dockerfile.loong64                 | 12 ++++
- cni-plugin/Makefile                           | 17 ++++--
- felix/bpf-apache/Makefile                     |  5 +-
- felix/bpf-gpl/Makefile                        |  5 +-
- .../include/libbpf/src/loong64/libbpf.pc      | 12 ++++
- go.mod                                        |  8 ++-
- go.sum                                        | 11 ++++
- kube-controllers/Dockerfile.loong64           |  7 +++
- kube-controllers/Makefile                     | 11 ++--
- .../flannel-migration/Dockerfile.loong64      |  7 +++
- lib.Makefile                                  | 32 +++++++----
- node/Dockerfile.loong64                       | 53 ++++++++++++++++++
- node/Makefile                                 |  5 +-
- node/calico_test/Dockerfile.calico_test       | 56 ++++++++++++++++++-
- pod2daemon/Dockerfile.loong64                 |  6 ++
- pod2daemon/Makefile                           | 12 ++--
- pod2daemon/csidriver/Dockerfile.loong64       |  5 ++
- .../Dockerfile.loong64                        |  5 ++
- typha/Makefile                                |  5 +-
- typha/docker-image/Dockerfile.loong64         | 21 +++++++
- 26 files changed, 311 insertions(+), 44 deletions(-)
- create mode 100644 apiserver/docker-image/Dockerfile.loong64
- create mode 100644 app-policy/Dockerfile.loong64
- create mode 100644 calicoctl/Dockerfile.loong64
- create mode 100644 cni-plugin/Dockerfile.loong64
- create mode 100644 felix/bpf-gpl/include/libbpf/src/loong64/libbpf.pc
- create mode 100644 kube-controllers/Dockerfile.loong64
- create mode 100644 kube-controllers/docker-images/flannel-migration/Dockerfile.loong64
- create mode 100644 node/Dockerfile.loong64
- mode change 120000 => 100644 node/calico_test/Dockerfile.calico_test
- create mode 100644 pod2daemon/Dockerfile.loong64
- create mode 100644 pod2daemon/csidriver/Dockerfile.loong64
- create mode 100644 pod2daemon/node-driver-registrar-docker/Dockerfile.loong64
- create mode 100644 typha/docker-image/Dockerfile.loong64
+    la
 
 diff --git a/apiserver/Makefile b/apiserver/Makefile
 index 0b909a7..17e0aee 100644
@@ -79,9 +37,108 @@ index 0b909a7..17e0aee 100644
  	touch $@
  
  $(CONTAINER_FIPS_CREATED): docker-image/Dockerfile.$(ARCH) $(BINDIR)/apiserver-$(ARCH) $(BINDIR)/filecheck-$(ARCH)
+diff --git a/apiserver/apiserver.local.config/certificates/apiserver.crt b/apiserver/apiserver.local.config/certificates/apiserver.crt
+new file mode 100644
+index 0000000..7a8038e
+--- /dev/null
++++ b/apiserver/apiserver.local.config/certificates/apiserver.crt
+@@ -0,0 +1,39 @@
++-----BEGIN CERTIFICATE-----
++MIIDOTCCAiGgAwIBAgIBAjANBgkqhkiG9w0BAQsFADAiMSAwHgYDVQQDDBdsb2Nh
++bGhvc3QtY2FAMTcxODY3NjI2ODAeFw0yNDA2MTgwMTA0MjdaFw0yNTA2MTgwMTA0
++MjdaMB8xHTAbBgNVBAMMFGxvY2FsaG9zdEAxNzE4Njc2MjY4MIIBIjANBgkqhkiG
++9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2iNw0xqNtZpJuTGA0TILfLpQTSJAhJEHc3Cs
++u+HtoocNUYdoioMB9cna6o+ybPVsSv8qtqX4iqMKpy1oHi6GhWNJjIzAubnrvIra
++QFsj/4QehAKRRxnyv2VmEMORfNi2cfmdkgahlQTkQuWwBdwwCn8Txcc7omWZ7v2Z
++D7MXf/WNQ6TGwBWP2xeWVPq31sx2yneaUv+n2W3JbyQU0c6mVECv8JiGLCRnQYgM
++rl4pYZcfuvFk5IzFePGLwD0i8M5zQmG7mRExuzFDUf/6NJxAoqGShoLmTkvsW9TN
++bF/2522u6FI9UkI7Dh5YHDhGz7L75hsb3Hb394BbEg/Zr24mYwIDAQABo30wezAO
++BgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAwwCgYIKwYBBQUHAwEwDAYDVR0TAQH/BAIw
++ADAfBgNVHSMEGDAWgBQnhQdtDe3DU8dSlMzwdRZ9/pEuZTAlBgNVHREEHjAcggls
++b2NhbGhvc3SCCWxvY2FsaG9zdIcEfwAAATANBgkqhkiG9w0BAQsFAAOCAQEAzveo
++grz/Y1BJmOjdGuNczJMeKgJUnS+JBm2oae5pN0qedRz+7cJirhhFrdsg+OQF+dTk
++6v3nQLg5wb0nvjxW1RFzl3HjlmZWjFEMqqn6Wcbolc/oPsZ/t+Ggsx5V7DgOWhEc
++l14tNwr2CSjnn1YP1Ri4/8qlh+XedjATRu0zOh0gnm4suvnBa09tEZSJA3rjGuta
++Je638IOFRz7G25DDeemt8BQxLKKtmHx81ye9vKpk3hF3i9047sDhMQBp2El5K50d
++x0fBuD/1d7gzZYC5AWjloHAxZINXMMB4ZCv+CCI/bQ/91nMVGjy8TUTT2C3ZtDTR
++/99+q2K4IxCX7NZICg==
++-----END CERTIFICATE-----
++-----BEGIN CERTIFICATE-----
++MIIDATCCAemgAwIBAgIBATANBgkqhkiG9w0BAQsFADAiMSAwHgYDVQQDDBdsb2Nh
++bGhvc3QtY2FAMTcxODY3NjI2ODAeFw0yNDA2MTgwMTA0MjdaFw0yNTA2MTgwMTA0
++MjdaMCIxIDAeBgNVBAMMF2xvY2FsaG9zdC1jYUAxNzE4Njc2MjY4MIIBIjANBgkq
++hkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6OkRLHKNtYpJpUkwmFq9aRfHwMgmkDy2
++GGPUFmux+y1mqgONvHE2K169iYbQWdl34TipBkESStTPE6BWzD/S12Bu0x4aMU9Y
++P6Kznw4jMVSnbxnc/Yo5BeheFTQkDi/f+Icu7Bxr9xud+uDNoLSO7i5mVQZ5Kcmd
++1EBW8CiuJr4/dMNSYxZN01IPegK/9WO0wjLRtJiI8rfyqB/YgLl2AeO2aXu/oWg3
++ScJ6s3MbP0sQb/n9I23Y3GCLwzWBsIK88tDp3PYk07PhC4L40s8MXb7Q90A9evtV
++gQa5axyyTR35F1rmrRgiGOMasEbWCbZutEdHMjx1o06V7iSkl5nKuwIDAQABo0Iw
++QDAOBgNVHQ8BAf8EBAMCAqQwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUJ4UH
++bQ3tw1PHUpTM8HUWff6RLmUwDQYJKoZIhvcNAQELBQADggEBAKtg5zxVy7itALW1
++Op2H0QexR4fAKdELn0EYTmI+SM/E7ct4oRzev0/8+IlpUj2GLUb595bIIKdyF891
++y4QmohrGzq96oAbfCSK3Mirh/hyQkrFVl39pDPabfgrgsKc1M2SQ4ss6MJDZCvK6
++dNJ/Jcqfr5Q2oeJ6NfXW2WyEMJPY8kUW3Ymsk1R5Ma6b2w0ejsKI4syuX13DQQu2
++nFSBREzidYq4nT6iLktqdE3JZnU4mRbmXWTTNQJjqV1KUU1cPFkksM3EoaD50vXC
++tk6sRgF9+dBTu89tBx9jgmfu0s63IEntuB0zlMUYl74c3zpn7f4aKNFS0c79gaO5
++DbYHg4c=
++-----END CERTIFICATE-----
+diff --git a/apiserver/apiserver.local.config/certificates/apiserver.key b/apiserver/apiserver.local.config/certificates/apiserver.key
+new file mode 100644
+index 0000000..bef1eca
+--- /dev/null
++++ b/apiserver/apiserver.local.config/certificates/apiserver.key
+@@ -0,0 +1,27 @@
++-----BEGIN RSA PRIVATE KEY-----
++MIIEowIBAAKCAQEA2iNw0xqNtZpJuTGA0TILfLpQTSJAhJEHc3Csu+HtoocNUYdo
++ioMB9cna6o+ybPVsSv8qtqX4iqMKpy1oHi6GhWNJjIzAubnrvIraQFsj/4QehAKR
++Rxnyv2VmEMORfNi2cfmdkgahlQTkQuWwBdwwCn8Txcc7omWZ7v2ZD7MXf/WNQ6TG
++wBWP2xeWVPq31sx2yneaUv+n2W3JbyQU0c6mVECv8JiGLCRnQYgMrl4pYZcfuvFk
++5IzFePGLwD0i8M5zQmG7mRExuzFDUf/6NJxAoqGShoLmTkvsW9TNbF/2522u6FI9
++UkI7Dh5YHDhGz7L75hsb3Hb394BbEg/Zr24mYwIDAQABAoIBAHXHNu60YpkQAgg8
++4zmQVMV2b08GVGF/UM+SoaEb/kuHsbg4bUiELbXA1DNbfNH5vQvNNAnEGSr5lxHm
++oVXSdw1kK1z4zkI5UT/OlMK0sv4OHs/V9wy1xOx0WiRpA4+uDuwBA4PJksq8Bmbc
++TysK1OGF9W4PAXLQesmgIVlpsCGEuvQ5ip8D8fnzfVhIpj9AT2UlMGEfPJ9Dh+5D
++UWOaCnGCTUykvWidGBoB+nDfLfATgWWHOKFp3iqd0wKY4s4HAg9c/9G57iaNIqcL
+++/dqEt/2BFoUDAbXRCzZbfqV5uBM2DfchP24WpIgLepP7ZCjk5IPbuWGg+dsbRBJ
++PZQz6BECgYEA9P+w3LkTL/oevSuJ3/8QrK9it0lCfkY02+KFrsNul0Nfpddombuw
++5D8aQxSQRGLuKRUQqOJo+gZuik/eOxHsgfKdtNLU4j35HHpIYOR6YA5c8oBTcvQ8
++Q2pl/CSSRDphB6RDR+rUsrvgCGBvWlydTbenKE4lqBmj2Uq9HGQloykCgYEA4+78
++HpOEgVUzkfs0LvxFooV8Qn9qBeWq/wA6PnJc6y2F6Zm51MWhBSWH88ItOkLZ42r5
++xcchRdkHDl8d4JfYrKE+Fs0cQSHK1Xj9FLSK4TGhglqciOISTOyPPqPhZQvPxQRf
++jAsU5AvuXiCFonEQr9r1Cl/eKyaltwrmfqj4GqsCgYEAq5m3+DGNVepbw2YOcR0H
++QdyqSPSAJU/pUCXuOoVaHYqsIM2qzxregFAOhfOORMgCRjYh8Bh9LLp6jFf6sOcR
++/8a+XVvajgiYRjEEJxGBAWyt/5CQYpDc8N9CRYQcCrvVIHQWR/YcOoBLH7Lj66e4
++6il7ZEiwKXikAdtOb+dZUVkCgYBDyrypy25JmTGxZWlr4BRF9jWzAXpjLp/hIAwy
++roj8WZnOlK40nmL5yOPamBIjleaAQTzwmf1HbPkwSRH1zrPfBEYXOgIBTS+qtkVv
++dxMnTz+eKZ0NCVAwGNux4cQT7aNqEZbpbBJWkUXgMQQOAFraMuFWqJTHeMMo4dEU
++MuU36QKBgH4yOjpKBxJSC/OJ/uc4CAjdCZKkYcVKNPPF2vjAPsWb+mEVMOgbFX7d
++m5/umROUGSL1bbwX8u4ecxuSmSq1DDT1SX7E2jdvtzRRj0ShxVyNFzM59LQFFQuw
++btlCooumxeo8Ava/iqyPYeb9tcnJXI6qZr3FAJ6NOeIoWZuhHcdu
++-----END RSA PRIVATE KEY-----
+diff --git a/apiserver/cmd/apiserver/server/version.go b/apiserver/cmd/apiserver/server/version.go
+index baa973c..5cc35e9 100644
+--- a/apiserver/cmd/apiserver/server/version.go
++++ b/apiserver/cmd/apiserver/server/version.go
+@@ -4,8 +4,16 @@ package server
+ import "fmt"
+ 
+ var VERSION, BUILD_DATE, GIT_DESCRIPTION, GIT_REVISION string
++//VERSION=$(shell git describe --tags --dirty --always --abbrev=12)
++//BUILD_DATE=$(shell date -u +'%FT%T%z')
++//GIT_DESCRIPTION=$(shell git describe --tags)
++//GIT_REVISION=$(shell git rev-parse --short HEAD)
+ 
+ func Version() error {
++	VERSION = "3.26.1"
++	BUILD_DATE = "2024-06-18T08:00:34+0000"
++	GIT_DESCRIPTION = "v3.26.1"
++	GIT_REVISION = "b1d192c"
+ 	fmt.Println("Version:     ", VERSION)
+ 	fmt.Println("Build date:  ", BUILD_DATE)
+ 	fmt.Println("Git tag ref: ", GIT_DESCRIPTION)
 diff --git a/apiserver/docker-image/Dockerfile.loong64 b/apiserver/docker-image/Dockerfile.loong64
 new file mode 100644
-index 0000000..805ba08
+index 0000000..d7c97ee
 --- /dev/null
 +++ b/apiserver/docker-image/Dockerfile.loong64
 @@ -0,0 +1,25 @@
@@ -101,8 +158,8 @@ index 0000000..805ba08
 +COPY  --from=ubi /code /code
 +COPY  --from=ubi /tmp /tmp
 +# copies the shared linux libs required by apiserver
-+COPY --from=ubi /lib64/libpthread.so.0 /lib64/libpthread.so.0
-+COPY --from=ubi /lib64/libc.so.6 /lib64/libc.so.6
++COPY --from=ubi /usr/lib/loongarch64-linux-gnu/libpthread.so.0 /lib64/libpthread.so.0
++COPY --from=ubi /usr/lib/loongarch64-linux-gnu/libc.so.6 /lib64/libc.so.6
 +
 +ADD  bin/apiserver-loong64 /code/apiserver
 +ADD  bin/filecheck-loong64 /code/filecheck
@@ -146,11 +203,11 @@ index d29bebd..cead084 100644
  $(CONTAINER_FIPS_CREATED): Dockerfile.$(ARCH) $(BINDIR)/dikastes-$(ARCH) $(BINDIR)/healthz-$(ARCH)
 diff --git a/calicoctl/Dockerfile.loong64 b/calicoctl/Dockerfile.loong64
 new file mode 100644
-index 0000000..480fbbc
+index 0000000..65107cf
 --- /dev/null
 +++ b/calicoctl/Dockerfile.loong64
 @@ -0,0 +1,13 @@
-+FROM lcr.loongnix.cn/library/alpine:3.19
++FROM lcr.loongnix.cn/library/debian:sid
 +# Enable non-native builds of this image on an amd64 hosts.
 +# This must be the first RUN command in this file!
 +LABEL MAINTAINER Tom Denham <tom@projectcalico.org>
@@ -409,11 +466,11 @@ index 380b990..dd0d50c 100644
  rsc.io/sampler v1.3.0/go.mod h1:T1hPZKmBbMNahiBKFy5HrXp6adAjACjK9JXDnKaTXpA=
 diff --git a/kube-controllers/Dockerfile.loong64 b/kube-controllers/Dockerfile.loong64
 new file mode 100644
-index 0000000..2a3cb90
+index 0000000..49189d8
 --- /dev/null
 +++ b/kube-controllers/Dockerfile.loong64
 @@ -0,0 +1,7 @@
-+FROM lcr.loongnix.cn/library/alpine:3.19
++FROM lcr.loongnix.cn/library/debian:sid
 +
 +LABEL maintainer "Casey Davenport <casey@tigera.io>"
 +
@@ -459,11 +516,11 @@ index 1718edd..840d6eb 100644
  $(KUBE_CONTROLLER_CONTAINER_FIPS_CREATED): $(BINDIR)/kube-controllers-linux-$(ARCH) $(BINDIR)/check-status-linux-$(ARCH) $(BINDIR)/kubectl-$(ARCH) register
 diff --git a/kube-controllers/docker-images/flannel-migration/Dockerfile.loong64 b/kube-controllers/docker-images/flannel-migration/Dockerfile.loong64
 new file mode 100644
-index 0000000..c6e0ea8
+index 0000000..a45f407
 --- /dev/null
 +++ b/kube-controllers/docker-images/flannel-migration/Dockerfile.loong64
 @@ -0,0 +1,7 @@
-+FROM lcr.loongnix.cn/library/alpine:3.19
++FROM lcr.loongnix.cn/library/debian:sid
 +LABEL maintainer "Song Jiang <song@tigera.io>"
 +
 +ADD bin/kubectl-loong64 /usr/bin/kubectl
@@ -471,10 +528,18 @@ index 0000000..c6e0ea8
 +ADD bin/check-status-linux-loong64 /usr/bin/check-status
 +ENTRYPOINT ["/usr/bin/kube-controllers"]
 diff --git a/lib.Makefile b/lib.Makefile
-index f613091..075fd8f 100644
+index f613091..61c4954 100644
 --- a/lib.Makefile
 +++ b/lib.Makefile
-@@ -50,6 +50,9 @@ endif
+@@ -27,6 +27,7 @@ endif
+ # list of arches *not* to build when doing *-all
+ EXCLUDEARCH?=
+ VALIDARCHES = $(filter-out $(EXCLUDEARCH),$(ARCHES))
++IMAGE_PREFIX?=lcr.loongnix.cn
+ 
+ # BUILDARCH is the host architecture
+ # ARCH is the target architecture
+@@ -50,6 +51,9 @@ endif
  ifeq ($(BUILDARCH),armv7l)
          BUILDARCH=armv7
  endif
@@ -484,7 +549,16 @@ index f613091..075fd8f 100644
  
  # unless otherwise set, I am building for my own architecture, i.e. not cross-compiling
  ARCH ?= $(BUILDARCH)
-@@ -149,8 +152,7 @@ endif
+@@ -76,7 +80,7 @@ endif
+ # detect the local outbound ip address
+ LOCAL_IP_ENV?=$(shell ip route get 8.8.8.8 | head -1 | awk '{print $$7}')
+ 
+-LATEST_IMAGE_TAG?=latest
++LATEST_IMAGE_TAG?=3.26.1
+ 
+ # these macros create a list of valid architectures for pushing manifests
+ space :=
+@@ -149,8 +153,7 @@ endif
  # the one for the host should contain all the necessary cross-compilation tools
  # we do not need to use the arch since go-build:v0.15 now is multi-arch manifest
  GO_BUILD_IMAGE ?= calico/go-build
@@ -494,7 +568,7 @@ index f613091..075fd8f 100644
  
  # We use BoringCrypto as FIPS validated cryptography in order to allow users to run in FIPS Mode (amd64 only).
  ifeq ($(ARCH), $(filter $(ARCH),amd64))
-@@ -161,6 +163,8 @@ else
+@@ -161,6 +164,8 @@ else
  CGO_ENABLED?=0
  endif
  
@@ -503,7 +577,7 @@ index f613091..075fd8f 100644
  # Build a static binary with boring crypto support.
  # This function expects you to pass in two arguments:
  #   1st arg: path/to/input/package(s)
-@@ -173,7 +177,7 @@ define build_static_cgo_boring_binary
+@@ -173,7 +178,7 @@ define build_static_cgo_boring_binary
          -e CGO_ENABLED=1 \
          -e CGO_LDFLAGS=$(CGO_LDFLAGS) \
          -e CGO_CFLAGS=$(CGO_CFLAGS) \
@@ -512,7 +586,7 @@ index f613091..075fd8f 100644
          sh -c '$(GIT_CONFIG_SSH) \
              GOEXPERIMENT=boringcrypto go build -o $(2)  \
              -tags fipsstrict,osusergo,netgo -v -buildvcs=false \
-@@ -194,7 +198,7 @@ define build_cgo_boring_binary
+@@ -194,7 +199,7 @@ define build_cgo_boring_binary
          -e CGO_ENABLED=1 \
          -e CGO_LDFLAGS=$(CGO_LDFLAGS) \
          -e CGO_CFLAGS=$(CGO_CFLAGS) \
@@ -521,7 +595,7 @@ index f613091..075fd8f 100644
          sh -c '$(GIT_CONFIG_SSH) \
              GOEXPERIMENT=boringcrypto go build -o $(2)  \
              -tags fipsstrict -v -buildvcs=false \
-@@ -209,7 +213,7 @@ define build_cgo_binary
+@@ -209,7 +214,7 @@ define build_cgo_binary
          -e CGO_ENABLED=1 \
          -e CGO_LDFLAGS=$(CGO_LDFLAGS) \
          -e CGO_CFLAGS=$(CGO_CFLAGS) \
@@ -530,7 +604,7 @@ index f613091..075fd8f 100644
          sh -c '$(GIT_CONFIG_SSH) \
              go build -o $(2)  \
              -v -buildvcs=false \
-@@ -219,7 +223,7 @@ endef
+@@ -219,7 +224,7 @@ endef
  
  # For binaries that do not require boring crypto.
  define build_binary
@@ -539,7 +613,7 @@ index f613091..075fd8f 100644
  		sh -c '$(GIT_CONFIG_SSH) \
  		go build -o $(2)  \
  		-v -buildvcs=false \
-@@ -229,7 +233,7 @@ endef
+@@ -229,7 +234,7 @@ endef
  
  # For binaries that do not require boring crypto.
  define build_static_binary
@@ -548,7 +622,7 @@ index f613091..075fd8f 100644
                  sh -c '$(GIT_CONFIG_SSH) \
                  go build -o $(2)  \
                  -v -buildvcs=false \
-@@ -277,6 +281,8 @@ LOCAL_USER_ID:=$(shell id -u)
+@@ -277,6 +282,8 @@ LOCAL_USER_ID:=$(shell id -u)
  LOCAL_GROUP_ID:=$(shell id -g)
  endif
  
@@ -557,7 +631,7 @@ index f613091..075fd8f 100644
  ifeq ("$(LOCAL_USER_ID)", "0")
  # The build needs to run as root.
  EXTRA_DOCKER_ARGS+=-e RUN_AS_ROOT='true'
-@@ -287,15 +293,17 @@ ifdef SSH_AUTH_SOCK
+@@ -287,15 +294,17 @@ ifdef SSH_AUTH_SOCK
  	EXTRA_DOCKER_ARGS += -v $(SSH_AUTH_SOCK):/ssh-agent --env SSH_AUTH_SOCK=/ssh-agent
  endif
  
@@ -577,7 +651,7 @@ index f613091..075fd8f 100644
  endif
  
  EXTRA_DOCKER_ARGS += -v $(GOMOD_CACHE):/go/pkg/mod:rw
-@@ -324,10 +332,14 @@ endif
+@@ -324,10 +333,14 @@ endif
  ifeq ($(ARCH),s390x)
  TARGET_PLATFORM=--platform=linux/s390x
  endif
@@ -593,12 +667,21 @@ index f613091..075fd8f 100644
  	     --build-arg UBI_IMAGE=$(UBI_IMAGE) \
  	     --build-arg GIT_VERSION=$(GIT_VERSION) $(TARGET_PLATFORM)
  
+@@ -904,7 +917,7 @@ retag-build-image-with-registry-%: var-require-all-REGISTRY-BUILD_IMAGES
+ # retag-build-image-arch-with-registry-% retags the build / arch image specified by $* and BUILD_IMAGE with the
+ # registry specified by REGISTRY.
+ retag-build-image-arch-with-registry-%: var-require-all-REGISTRY-BUILD_IMAGE-IMAGETAG
+-	docker tag $(BUILD_IMAGE):$(LATEST_IMAGE_TAG)-$* $(call filter-registry,$(REGISTRY))$(BUILD_IMAGE):$(IMAGETAG)-$*
++	docker tag $(BUILD_IMAGE):$(LATEST_IMAGE_TAG)-$* $(call filter-registry,$(IMAGE_PREFIX)/$(REGISTRY))$(BUILD_IMAGE):$(IMAGETAG)-$*
+ 	$(if $(filter $*,amd64),\
+ 		docker tag $(BUILD_IMAGE):$(LATEST_IMAGE_TAG)-$(ARCH) $(REGISTRY)/$(BUILD_IMAGE):$(IMAGETAG),\
+ 		$(NOECHO) $(NOOP)\
 diff --git a/node/Dockerfile.loong64 b/node/Dockerfile.loong64
 new file mode 100644
-index 0000000..d6abd28
+index 0000000..e7188bd
 --- /dev/null
 +++ b/node/Dockerfile.loong64
-@@ -0,0 +1,53 @@
+@@ -0,0 +1,57 @@
 +# Copyright (c) 2015-2016,2021 Tigera, Inc. All rights reserved.
 +# Copyright IBM Corp. 2017
 +#
@@ -620,7 +703,7 @@ index 0000000..d6abd28
 +
 +FROM lcr.loongnix.cn/calico/bpftool:5.19 as bpftool
 +
-+FROM lcr.loongnix.cn/library/alpine:3.19
++FROM lcr.loongnix.cn/library/debian:sid
 +LABEL MAINTAINER David Wilder <wilder@us.ibm.com>
 +
 +ARG ARCH=loong64
@@ -629,13 +712,17 @@ index 0000000..d6abd28
 +ENV DOCKER_API_VERSION 1.21
 +
 +# Install remaining runtime deps required for felix from the global repository
-+RUN apk add --no-cache ip6tables ipset iputils iproute2 conntrack-tools runit file ca-certificates
++RUN apt update && apt install -y iptables ipset iputils-ping iproute2 conntrack runit file ca-certificates
 +
 +# Copy our bird binaries in
 +COPY --from=bird /bird* /bin/
 +
 +# Copy in the filesystem - this contains felix, calico-bgp-daemon etc...
-+COPY filesystem/ /
++COPY filesystem/etc/*  /etc/
++COPY filesystem/included-source/*  /included-source/
++COPY filesystem/licenses/* /licenses/
++COPY filesystem/sbin/*  /sbin/
++COPY filesystem/usr/* /usr/
 +
 +# Copy in the calico-node binary
 +COPY dist/bin/calico-node-${ARCH} /bin/calico-node
@@ -746,29 +833,45 @@ index 0000000..8e96d05
 +WORKDIR /code/
 diff --git a/pod2daemon/Dockerfile.loong64 b/pod2daemon/Dockerfile.loong64
 new file mode 100644
-index 0000000..6b930a8
+index 0000000..706fe08
 --- /dev/null
 +++ b/pod2daemon/Dockerfile.loong64
 @@ -0,0 +1,6 @@
-+FROM lcr.loongnix.cn/library/alpine:3.19
++FROM lcr.loongnix.cn/library/debian:sid
 +
 +ADD flexvol/docker/flexvol.sh /usr/local/bin/
 +ADD bin/flexvol-loong64 /usr/local/bin/flexvol
 +
 +ENTRYPOINT ["/usr/local/bin/flexvol.sh"]
 diff --git a/pod2daemon/Makefile b/pod2daemon/Makefile
-index cfae903..e1099a5 100644
+index cfae903..e7335be 100644
 --- a/pod2daemon/Makefile
 +++ b/pod2daemon/Makefile
-@@ -7,6 +7,7 @@ PACKAGE_NAME = github.com/projectcalico/calico/pod2daemon
+@@ -7,7 +7,9 @@ PACKAGE_NAME = github.com/projectcalico/calico/pod2daemon
  FLEXVOL_IMAGE   ?=pod2daemon-flexvol
  CSI_IMAGE       ?=csi
  REGISTRAR_IMAGE ?=node-driver-registrar
-+IMAGE_NAME      ?=$(REGISTRAR_IMAGE):latest-$(ARCH)
++IMAGE_NAME      ?=$(REGISTRAR_IMAGE):3.26.1
  BUILD_IMAGES    ?=$(FLEXVOL_IMAGE) $(CSI_IMAGE) $(REGISTRAR_IMAGE)
++IMAGE_TAG       ?=3.26.1-$(ARCH)
  
  ###############################################################################
-@@ -130,6 +131,9 @@ REGISTRAR_BUILD_CMD=$(REGISTRAR_UPSTREAM_BUILD_CMD)
+ # Download and include ../lib.Makefile before anything else
+@@ -32,10 +34,10 @@ clean:
+ 	rm -rf bin/$(REGISTRAR_IMAGE)-$(ARCH)
+ 	rm -rf bin
+ 
+-	docker rmi $(FLEXVOL_IMAGE):latest-$(ARCH) || true
++	docker rmi $(FLEXVOL_IMAGE):$(IMAGE_TAG) || true
+ 	docker rmi $(FLEXVOL_IMAGE):$(VERSION)-$(ARCH) || true
+-	docker rmi $(CSI_IMAGE):latest-$(ARCH) || true
+-	docker rmi $(REGISTRAR_IMAGE):latest-$(ARCH) || true
++	docker rmi $(CSI_IMAGE):$(IMAGE_TAG) || true
++	docker rmi $(REGISTRAR_IMAGE):$(IMAGE_TAG) || true
+ 	docker rmi $(CSI_IMAGE):latest-fips-$(ARCH) || true
+ 	docker rmi $(REGISTRAR_IMAGE):latest-fips-$(ARCH) || true
+ 	$(MAKE) clean-registrar
+@@ -130,6 +132,9 @@ REGISTRAR_BUILD_CMD=$(REGISTRAR_UPSTREAM_BUILD_CMD)
  else ifeq ($(ARCH), $(filter $(ARCH),s390x))
  BUILD_PLATFORMS="linux s390x s390x"
  REGISTRAR_BUILD_CMD=$(REGISTRAR_UPSTREAM_BUILD_CMD)
@@ -778,51 +881,82 @@ index cfae903..e1099a5 100644
  else ifeq ($(ARCH), $(filter $(ARCH),win64))
  BUILD_PLATFORMS="windows amd64 amd64"
  REGISTRAR_BUILD_CMD=$(REGISTRAR_UPSTREAM_BUILD_CMD)
-@@ -171,13 +175,13 @@ sub-image-fips-%:
+@@ -171,30 +176,30 @@ sub-image-fips-%:
  
  $(FLEXVOL_IMAGE): $(FLEXVOL_CONTAINER_MARKER)
  $(FLEXVOL_CONTAINER_CREATED): Dockerfile.$(ARCH) bin/flexvol-$(ARCH)
 -	$(DOCKER_BUILD) --build-arg BIN_DIR=bin -t $(FLEXVOL_IMAGE):latest-$(ARCH) -f Dockerfile.$(ARCH) . --load
-+	$(DOCKER_BUILD) --build-arg BIN_DIR=bin -t $(FLEXVOL_IMAGE):latest-$(ARCH) -f Dockerfile.$(ARCH) . 
- 	$(MAKE) retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=latest BUILD_IMAGES=$(FLEXVOL_IMAGE)
+-	$(MAKE) retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=latest BUILD_IMAGES=$(FLEXVOL_IMAGE)
++	$(DOCKER_BUILD) --build-arg BIN_DIR=bin -t $(FLEXVOL_IMAGE):$(IMAGE_TAG) -f Dockerfile.$(ARCH) . 
++	$(MAKE) retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=3.26.1 BUILD_IMAGES=$(FLEXVOL_IMAGE)
  	touch $@
  
  $(CSI_IMAGE): $(CSI_CONTAINER_MARKER)
  $(CSI_CONTAINER_CREATED): csidriver/Dockerfile.$(ARCH) $(BINDIR)/csi-driver-$(ARCH)
 -	$(DOCKER_BUILD) --build-arg BIN_DIR=$(BINDIR) -t $(CSI_IMAGE):latest-$(ARCH) -f csidriver/Dockerfile.$(ARCH) . --load
-+	$(DOCKER_BUILD) --build-arg BIN_DIR=$(BINDIR) -t $(CSI_IMAGE):latest-$(ARCH) -f csidriver/Dockerfile.$(ARCH) .
- 	$(MAKE) retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=latest BUILD_IMAGES=$(CSI_IMAGE)
+-	$(MAKE) retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=latest BUILD_IMAGES=$(CSI_IMAGE)
++	$(DOCKER_BUILD) --build-arg BIN_DIR=$(BINDIR) -t $(CSI_IMAGE):$(IMAGE_TAG) -f csidriver/Dockerfile.$(ARCH) .
++	$(MAKE) retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=3.26.1 BUILD_IMAGES=$(CSI_IMAGE)
  	touch $@
  
-@@ -188,8 +192,8 @@ $(CSI_CONTAINER_FIPS_CREATED): csidriver/Dockerfile.$(ARCH) $(BINDIR)/csi-driver
+ $(CSI_CONTAINER_FIPS_CREATED): csidriver/Dockerfile.$(ARCH) $(BINDIR)/csi-driver-$(ARCH)
+ 	$(DOCKER_BUILD) --build-arg BIN_DIR=$(BINDIR) -t $(CSI_IMAGE):latest-fips-$(ARCH) -f csidriver/Dockerfile.$(ARCH) . --load
+-	$(MAKE) FIPS=true retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=latest-fips BUILD_IMAGES=$(CSI_IMAGE) LATEST_IMAGE_TAG=latest-fips
++	$(MAKE) FIPS=true retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=3.26.1-fips BUILD_IMAGES=$(CSI_IMAGE) LATEST_IMAGE_TAG=latest-fips
+ 	touch $@
  
  $(REGISTRAR_IMAGE): $(REGISTRAR_CONTAINER_MARKER)
  $(REGISTRAR_CONTAINER_CREATED): node-driver-registrar-docker/Dockerfile.$(ARCH) $(BINDIR)/node-driver-registrar-$(ARCH)
 -	$(DOCKER_BUILD) --build-arg BIN_DIR=$(BINDIR) -t $(REGISTRAR_IMAGE):latest-$(ARCH) -f node-driver-registrar-docker/Dockerfile.$(ARCH) . --load
 -	$(MAKE) retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=latest BUILD_IMAGES=$(REGISTRAR_IMAGE)
 +	$(DOCKER_BUILD) --build-arg BIN_DIR=$(BINDIR) -t $(IMAGE_NAME) -f node-driver-registrar-docker/Dockerfile.$(ARCH) . 
-+	# $(MAKE) retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=latest BUILD_IMAGES=$(REGISTRAR_IMAGE)
++	# $(MAKE) retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=3.26.1 BUILD_IMAGES=$(REGISTRAR_IMAGE)
  	touch $@
  
  $(REGISTRAR_CONTAINER_FIPS_CREATED): node-driver-registrar-docker/Dockerfile.$(ARCH) $(BINDIR)/node-driver-registrar-$(ARCH)
+ 	$(DOCKER_BUILD) --build-arg BIN_DIR=$(BINDIR) -t $(REGISTRAR_IMAGE):latest-fips-$(ARCH) -f node-driver-registrar-docker/Dockerfile.$(ARCH) . --load
+-	$(MAKE) FIPS=true retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=latest-fips BUILD_IMAGES=$(REGISTRAR_IMAGE) LATEST_IMAGE_TAG=latest-fips
++	$(MAKE) FIPS=true retag-build-images-with-registries VALIDARCHES=$(ARCH) IMAGETAG=3.26.1-fips BUILD_IMAGES=$(REGISTRAR_IMAGE) LATEST_IMAGE_TAG=latest-fips
+ 	touch $@
+ node-driver-registrar/release-tools/filter-junit.go:
+ 
+@@ -230,9 +235,9 @@ release-build: .release-$(VERSION).created
+ .release-$(VERSION).created:
+ 	$(MAKE) clean image-all RELEASE=true
+ 	$(MAKE) retag-build-images-with-registries IMAGETAG=$(VERSION) RELEASE=true
+-	$(MAKE) retag-build-images-with-registries IMAGETAG=latest RELEASE=true
++	$(MAKE) retag-build-images-with-registries IMAGETAG=3.26.1 RELEASE=true
+ 	$(MAKE) FIPS=true BUILD_IMAGES='$(CSI_IMAGE) $(REGISTRAR_IMAGE)' retag-build-images-with-registries IMAGETAG=$(VERSION)-fips RELEASE=true LATEST_IMAGE_TAG=latest-fips
+-	$(MAKE) FIPS=true BUILD_IMAGES='$(CSI_IMAGE) $(REGISTRAR_IMAGE)' retag-build-images-with-registries RELEASE=true IMAGETAG=latest-fips LATEST_IMAGE_TAG=latest-fips
++	$(MAKE) FIPS=true BUILD_IMAGES='$(CSI_IMAGE) $(REGISTRAR_IMAGE)' retag-build-images-with-registries RELEASE=true IMAGETAG=3.26.1-fips LATEST_IMAGE_TAG=latest-fips
+ 	touch $@
+ 
+ ## Pushes a github release and release artifacts produced by `make release-build`.
+@@ -246,5 +251,5 @@ release-publish: release-prereqs .release-$(VERSION).published
+ # run this target for alpha / beta / release candidate builds, or patches to earlier Calico versions.
+ ## Pushes `latest` release images. WARNING: Only run this for latest stable releases.
+ release-publish-latest: release-prereqs
+-	$(MAKE) push-images-to-registries push-manifests IMAGETAG=latest RELEASE=$(RELEASE) CONFIRM=$(CONFIRM)
++	$(MAKE) push-images-to-registries push-manifests IMAGETAG=3.26.1 RELEASE=$(RELEASE) CONFIRM=$(CONFIRM)
+ 	$(MAKE) FIPS=true BUILD_IMAGES='$(CSI_IMAGE) $(REGISTRAR_IMAGE)' push-images-to-registries push-manifests IMAGETAG=$(VERSION)-fips RELEASE=$(RELEASE) CONFIRM=$(CONFIRM)
 diff --git a/pod2daemon/csidriver/Dockerfile.loong64 b/pod2daemon/csidriver/Dockerfile.loong64
 new file mode 100644
-index 0000000..997b43e
+index 0000000..2eaa6b4
 --- /dev/null
 +++ b/pod2daemon/csidriver/Dockerfile.loong64
 @@ -0,0 +1,5 @@
-+FROM lcr.loongnix.cn/library/alpine:3.19
++FROM lcr.loongnix.cn/library/debian:sid
 +
 +ADD bin/csi-driver-loong64 /usr/local/bin/csi-driver
 +
 +ENTRYPOINT ["/usr/local/bin/csi-driver"]
 diff --git a/pod2daemon/node-driver-registrar-docker/Dockerfile.loong64 b/pod2daemon/node-driver-registrar-docker/Dockerfile.loong64
 new file mode 100644
-index 0000000..e5d7ad8
+index 0000000..098eafc
 --- /dev/null
 +++ b/pod2daemon/node-driver-registrar-docker/Dockerfile.loong64
 @@ -0,0 +1,5 @@
-+FROM lcr.loongnix.cn/library/alpine:3.19
++FROM lcr.loongnix.cn/library/debian:sid
 +
 +ADD bin/node-driver-registrar-loong64 /usr/local/bin/node-driver-registrar
 +
@@ -852,17 +986,17 @@ index 35e96d4..f109f9c 100644
  $(TYPHA_CONTAINER_FIPS_CREATED): $(BINDIR)/calico-typha-$(ARCH) \
 diff --git a/typha/docker-image/Dockerfile.loong64 b/typha/docker-image/Dockerfile.loong64
 new file mode 100644
-index 0000000..fd5aefe
+index 0000000..98384eb
 --- /dev/null
 +++ b/typha/docker-image/Dockerfile.loong64
 @@ -0,0 +1,21 @@
-+FROM lcr.loongnix.cn/library/alpine:3.19 as base
++FROM lcr.loongnix.cn/library/debian:sid as base
 +LABEL MAINTAINER Shaun Crampton <shaun@tigera.io>
 +
-+ADD https://github.com/Loongson-Cloud-Community/tini/releases/download/v0.19.0/tini-static /sbin/tini
++ADD http://cloud.loongnix.cn/releases/loongarch64/krallin/tini/0.19.0/tini-static /sbin/tini
 +RUN chmod +x /sbin/tini
 +
-+FROM scratch
++FROM lcr.loongnix.cn/library/debian:sid
 +COPY --from=base /sbin/tini /sbin/tini
 +
 +# Put our binary in /code rather than directly in /usr/bin.  This allows the downstream builds
@@ -877,6 +1011,3 @@ index 0000000..fd5aefe
 +# Run Typha by default
 +ENTRYPOINT ["/sbin/tini", "--"]
 +CMD ["calico-typha"]
--- 
-2.41.0
-
