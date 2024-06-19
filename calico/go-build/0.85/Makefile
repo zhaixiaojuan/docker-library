@@ -3,7 +3,8 @@
 REGISTRY?=lcr.loongnix.cn
 ORGANIZATION?=calico
 REPOSITORY?=go-build
-TAG?=v0.85
+VCODE?=v0.85
+TAG?=v0.85-sid
 LATEST?=false
 
 IMAGE=$(REGISTRY)/$(ORGANIZATION)/$(REPOSITORY):$(patsubst v%,%,$(TAG))
@@ -16,7 +17,7 @@ PATCH=0001-add-loong64-support-abi-2.0.patch
 default: image
 
 src/$(SOURCE):
-	git clone -q -b $(TAG) --depth=1 $(SOURCE_URL) $@
+	git clone -q -b $(VCODE) --depth=1 $(SOURCE_URL) $@
 	cd $@ && \
 		git apply ../../$(PATCH)
 
