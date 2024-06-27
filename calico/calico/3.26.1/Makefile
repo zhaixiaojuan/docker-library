@@ -8,13 +8,12 @@ LATEST?=false
 
 
 IMG_TAG ?= $(patsubst v%,%,$(TAG))
-CALICO_BUILD ?= lcr.loongnix.cn/calico/go-build:0.85
+CALICO_BUILD ?= lcr.loongnix.cn/calico/go-build:0.85-sid
 GOPROXY ?= https://goproxy.cn,https://mirrors.aliyun.com/goproxy/,https://goproxy.io,direct
 
 SOURCE_URL=https://github.com/projectcalico/calico.git
 SOURCE=$(shell echo $(SOURCE_URL) | awk -F '/' '{print $$NF}' | awk -F '.' '{print $$1}')
 PATCH=0001-add-loong64-support-abi-2.0.patch
-
 
 BUILD_TG ?= \
     pod2daemon \
@@ -26,7 +25,8 @@ BUILD_TG ?= \
     typha \
     node
 
-PUSH_IMG ?= pod2daemon \
+PUSH_IMG ?= \
+    pod2daemon \
     calicoctl \
     cni \
     apiserver \
@@ -38,7 +38,7 @@ PUSH_IMG ?= pod2daemon \
 
 THIS_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 
-default: image
+default: image docker_tag
 
 src/$(SOURCE):
 	git clone -q -b $(TAG) --depth=1 $(SOURCE_URL) $@
@@ -52,15 +52,21 @@ image: src/$(SOURCE)
 		GOPROXY="" \
 		BUILDARCH=loong64 \
 			BIRD_IMAGE=lcr.loongnix.cn/calico/bird:0.3.3 \
-			UBI_IMAGE=lcr.loongnix.cn/library/openeuler:22.03-LTS \
+			UBI_IMAGE=lcr.loongnix.cn/library/debian:sid \
 			CALICO_BUILD=$(CALICO_BUILD) \
 			IMAGE_NAME=$(REGISTRY)/$(ORGANIZATION)/$(value):$(IMG_TAG) \
 			FLANNEL_IMAGE_NAME=$(REGISTRY)/$(ORGANIZATION)/flannel-migration-controller:$(IMG_TAG) \
 			GOMOD_CACHE=$(THIS_DIR)src/go-mod make -C src/$(SOURCE)/$(value) image IMAGETAG=$(TAG) VALIDARCHES=loong64; \
 	)
-	docker tag $(REGISTRY)/$(ORGANIZATION)/cni-plugin:$(IMG_TAG) \
-		$(REGISTRY)/$(ORGANIZATION)/cni:$(IMG_TAG)
 	chmod -R +w src
+
+
+docker_tag:
+	$(foreach value,$(BUILD_TG),\
+        $(if $(filter cni-plugin,$(value)),\
+            docker tag $(REGISTRY)/$(ORGANIZATION)/cni-plugin:$(IMG_TAG) $(REGISTRY)/$(ORGANIZATION)/cni:$(IMG_TAG);\
+        )\
+	)
 
 push:
 	@$(foreach value, $(PUSH_IMG), \
