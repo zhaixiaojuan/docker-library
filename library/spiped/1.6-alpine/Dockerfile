@@ -1,4 +1,4 @@
-FROM lcr.loongnix.cn/library/alpine:3.19
+FROM lcr.loongnix.cn/library/alpine:3.19-temporary
 
 LABEL maintainer="yangzewei@loongson.cn"
 
