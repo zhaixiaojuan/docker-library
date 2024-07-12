@@ -20,7 +20,6 @@ fi
 output="openEuler-${version}.rootfs.${arch}.tar.gz"
 
 repos_baseos_url="https://eulermaker.compass-ci.openeuler.openatom.cn/api/ems3/repositories/openEuler-24.03-LTS-everything:loongarch/openEuler%3A24.03-LTS/loongarch64/"
-repos_baseos_url_2="/root/docker-library/openanolis/anolisos/23.1/git-lfs"
 
 trap cleanup TERM EXIT
 
@@ -38,7 +37,7 @@ pkg_list="
  json-c mpfr ncurses-base procps-ng rpm findutils
  npth p11-kit p11-kit-trust pcre2 popt readline rootfiles
  rpm sed setup systemd-libs tzdata vim-minimal xz yum
- git git-core make gcc procps rpm-build findutils dnf-plugins-core git-lfs
+ git git-core make gcc procps rpm-build findutils dnf-plugins-core
 "
 
 ####################################################################
@@ -63,13 +62,6 @@ enabled=1
 priority=2
 excludepkgs="${exclude_pkgs}"
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-LOONGNIX
-[baseos-1]
-name=openEuler-$releasever-1
-baseurl=${repos_baseos_url_2}
-gpgcheck=0
-enabled=1
-priority=1
-excludepkgs="${exclude_pkgs}"
 EOF
 ####################################################################
 
